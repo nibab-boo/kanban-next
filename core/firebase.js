@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp, deleteApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -14,9 +14,8 @@ const firebaseConfig = {
   appId: process.env.FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-// check if app is already initialized
-const app = !getApps().length ?initializeApp(firebaseConfig) : getApp();
-const db = getFirestore();
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-export { app, db }
+const db = getFirestore(app);
+
+export { app, db, firebaseConfig}
