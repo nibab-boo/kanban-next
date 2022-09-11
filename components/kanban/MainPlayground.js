@@ -2,6 +2,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 import { darkTheme } from '../../styles/color';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { Button } from '../common/Button';
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -18,15 +19,7 @@ const Heading = styled.div`
   justify-content: space-between;
 `
 
-const NewTaskButton = styled.div`
-  background: ${darkTheme.buttonBg};
-  padding: .8rem 1.2rem;
-  display: inline-block;
-  border-radius: 28px;
-  font-weight: 500;
-  `
-  
-  const Options = styled.div`
+const Options = styled.div`
   svg {
     vertical-align: middle;
   }
@@ -123,7 +116,7 @@ const MainPlayground = () => {
       <Heading>
         <h2 style={{margin: "0"}}>Daily Plans</h2>
         <Options>
-          <NewTaskButton>+Add New Task</NewTaskButton>
+          <Button>+Add New Task</Button>
           <MoreVertIcon />
         </Options>
       </Heading>
