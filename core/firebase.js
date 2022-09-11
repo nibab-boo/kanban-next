@@ -8,14 +8,15 @@ import { getFirestore } from "firebase/firestore"
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_KEY,
   authDomain: process.env.FIREBASE_P_ID + ".firebaseapp.com",
-  projectId: process.env.FIREBASE_P_ID,
+  projectId: "kanban-next",
   storageBucket: process.env.FIREBASE_P_ID + ".appspot.com",
   messagingSenderId: process.env.FIREBASE_MSG,
   appId: process.env.FIREBASE_APP_ID
 };
 
+
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const db = getFirestore(app);
 
-export { app, db, firebaseConfig}
+export { app, db, firebaseConfig }
