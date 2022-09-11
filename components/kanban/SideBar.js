@@ -8,6 +8,8 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import Switch from '@mui/material/Switch';
+import { useRecoilState } from "recoil";
+import { modalState } from "../../atoms/modalAtom";
 
 const label = { inputProps: { 'aria-label': 'Switch demo' } };
 
@@ -96,6 +98,8 @@ const ToogleShow = styled.div`
 `
 
 const SideBar = () => {
+  const [open, setOpen] = useRecoilState(modalState);
+
   return (
     <SideBarContainer>
       <LogoBox>
@@ -125,7 +129,9 @@ const SideBar = () => {
               Keys to happy life
             </Text>
           </Board>
-          <Board createNew>
+          <Board createNew
+            onClick={() => setOpen(true)}
+          >
             <ViewSidebarIcon style={{ marginRight: ".8rem" }}/>
             <strong>
               +

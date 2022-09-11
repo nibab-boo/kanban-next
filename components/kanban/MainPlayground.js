@@ -36,26 +36,35 @@ const PlayGround = styled.div`
   background: ${darkTheme.bodyBg};
   width: auto;
   height: calc(100vh - 5rem);
-  overflow: hidden;
+  // overflow: hidden;
   padding: 1rem;
   font-size: .8rem;
   display: flex;
   gap: 1rem;
+  overflow: scroll;
+
+  // Hide scrollbar
+  -ms-overflow-style: none; /* Edge, Internet Explorer */
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 `
 
 const Column = styled.div`
   width: 260px; 
   max-width: 70vw;
   height: auto;
-
+  
   ${props => props.addNew && css`
-    background-color: ${darkTheme.sideBg};
-    opacity: .4;
-    margin-top: 2rem;
-    display: flex;
-    align-items: center;
-    `
-  }
+  background-color: ${darkTheme.sideBg};
+  opacity: .4;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  `
+}
 `
 
 const Dot = styled.h4`
@@ -63,9 +72,15 @@ const Dot = styled.h4`
   letter-spacing: .5px;
   margin: 0 0 0 1rem;
   // margin-left: 1rem;
-  position: relative;
+  // position: relative;
+  position: sticky;
+  top: 0;
   padding-left: .8rem;
   color: ${darkTheme.secondaryText};
+  
+  background: ${darkTheme.bodyBg};
+  opacity: .5;
+  backdrop-filter: blur(1px);
   
   &:before {
     content: "";
@@ -78,9 +93,10 @@ const Dot = styled.h4`
     height: .8rem;
     background: white;
   }
-`
+  `
 
 const Card = styled.div`
+  width: 260px; 
   line-height: 125%;
   font-weight: 500;
   background: ${darkTheme.sideBg};
@@ -96,7 +112,7 @@ const Card = styled.div`
   ${props => props.addNew && css`
     color: ${darkTheme.secondaryText};
     font-size: 1.5rem;
-    margin: auto;
+    text-align: center;
   `}
 `
 
@@ -128,6 +144,66 @@ const MainPlayground = () => {
           </Card>
         </Column>
 
+        <Column>
+          <Dot>DOING ( 6 )</Dot>
+          <Card>
+            Design settings and search pages
+          </Card>
+          <Card>
+            Design onboarding flow
+          </Card>
+          <Card>
+            Add search endpoints
+          </Card>
+          <Card>
+            Research pricing points of various competitors and trial different business models
+          </Card>
+          <Card>
+            Design settings and search pages
+          </Card>
+          <Card>
+            Design onboarding flow
+          </Card>
+          <Card>
+            Add search endpoints
+          </Card>
+          <Card>
+            Research pricing points of various competitors and trial different business models
+          </Card>
+        </Column>
+
+        <Column>
+          <Dot>DOING ( 6 )</Dot>
+          <Card>
+            Design settings and search pages
+          </Card>
+          <Card>
+            Design onboarding flow
+          </Card>
+          <Card>
+            Add search endpoints
+          </Card>
+          <Card>
+            Research pricing points of various competitors and trial different business models
+          </Card>
+        </Column>
+
+        <Column>
+          <Dot>DOING ( 6 )</Dot>
+          <Card>
+            Design settings and search pages
+          </Card>
+          <Card>
+            Design onboarding flow
+          </Card>
+          <Card>
+            Add search endpoints
+          </Card>
+          <Card>
+            Research pricing points of various competitors and trial different business models
+          </Card>
+        </Column>
+        
         <Column>
           <Dot>DOING ( 6 )</Dot>
           <Card>
