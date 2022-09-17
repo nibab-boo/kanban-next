@@ -10,9 +10,22 @@ import { useRecoilState } from "recoil";
 import { useSession } from "next-auth/react";
 import InputField from "../components/common/InputField";
 import { useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+  documentId,
+} from "firebase/firestore";
 import { db } from "../core/firebase";
 import { selectedState } from "../atoms/selectedAtom";
+import Router from "next/router";
+import { useCallback } from "react";
+import { useEffect } from "react";
+import { projectsState } from "../atoms/projectsAtoms";
+import { ConnectingAirportsOutlined } from "@mui/icons-material";
 
 const Container = styled.div`
   display: flex;
@@ -39,14 +52,47 @@ const style = {
 const Kanban = () => {
   const [open, setOpen] = useRecoilState(modalState);
   const [selectedId, setSelectedId] = useRecoilState(selectedState);
-  const { data: session } = useSession();
-  console.log("SESSION", session);
+  const [projects, setProjects] = useRecoilState(projectsState);
+  const { data: session, status } = useSession();
+  const [keyword, setKeyword] = useState("");
 
-  const createProject = async () => {
+  
+  
+  const fetchSong = useCallback(async () => {
+    const q = query(
+      collection(db, "projects"),
+      where("user_id", "==", session?.user?.id ?? "")
+    );
+
+    const projectSnapshot = await getDocs(q);
+
+    const allProjects = []
+
+    projectSnapshot.forEach((doc) => {
+      console.log(doc.id, " => ", doc.data());
+      allProjects.push({
+        id: doc.id,
+        ...(doc.data())
+      })
+    });
+
+    allProjects.sort((a, b) => {
+      const firstTime = a?.timestamp?.seconds;
+      const secondTime = b?.timestamp?.seconds;
+
+      if (firstTime > secondTime) return 1;
+      if (firstTime < secondTime) return -1;
+      return 0;
+    })
+    setProjects(allProjects ?? []);
+  }, [session, setProjects]);
+  
+
+  
+  const createProject = useCallback(async () => {
     if (!keyword && !session?.user?.id) return;
-
+    
     try {
-      console.log("KANBAN.JS: I am making a call.")
       const response = await addDoc(collection(db, "projects"), {
         name: keyword,
         user_id: session.user.id,
@@ -56,10 +102,17 @@ const Kanban = () => {
     } catch (error) {
       console.error("ERROR", error);
     }
-  };
+  }, [keyword, selectedId, session, setSelectedId]);
+ 
+  useEffect(() => {
+    console.log("session?.user?.id", session?.user?.id);
+    fetchSong();
+  }, [fetchSong, session]);
+  
+  if (status === "loading") return <p>Loading.....</p>
 
-  const [keyword, setKeyword] = useState("");
-
+  if (status === "unauthenticated") Router.push("/");
+  
   return (
     <Container>
       <Head>
@@ -90,11 +143,7 @@ const Kanban = () => {
               placeholder="eg. Web Design"
               onChange={(e) => setKeyword(e?.target?.value ?? "")}
             />
-            <Button
-              fullSize
-              margin="2rem auto 0"
-              onClick={createProject}
-            >
+            <Button fullSize margin="2rem auto 0" onClick={createProject}>
               Create New Task
             </Button>
           </Typography>
