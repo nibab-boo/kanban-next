@@ -11,7 +11,7 @@ import Switch from '@mui/material/Switch';
 import { useRecoilState } from "recoil";
 import { modalState } from "../../atoms/modalAtom";
 
-const label = { inputProps: { 'aria-label': 'Switch demo' } };
+const label = { inputProps: { 'aria-label': 'Switch Mode' } };
 
 const SideBarContainer = styled.div`
   max-width: 70vw;
