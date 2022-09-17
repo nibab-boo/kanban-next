@@ -36,6 +36,7 @@ const InputField = ({
   name="input",
   label,
   placeholder="",
+  ...props
 }) => {
   return (
     <InputContainer margin={containerMargin}>
@@ -45,6 +46,7 @@ const InputField = ({
       <Input 
         name={name}
         placeholder={placeholder}
+        {...props}
       />
     </InputContainer>
   );
