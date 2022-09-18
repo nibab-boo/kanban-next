@@ -44,8 +44,8 @@ export default async function handler(req, res) {
   }
 
   allColumns.forEach(column => {
-    const myTask = allTasks.find(task => task.columnId === column.id);
-    column.items = myTask ?? null;
+    const myTask = allTasks.filter(task => task.columnId === column.id);
+    column.items = myTask ?? [];
   });
 
   return res.status(200).json({ data: allColumns });

@@ -9,6 +9,10 @@ import { Button } from "../Button";
 import InputField, { InputContainer, Label } from "../InputField";
 import styled from "styled-components";
 import { newTaskModalState } from "../../../atoms/newTaskModalAtom";
+import { async } from "@firebase/util";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "../../../core/firebase";
+import { selectedState } from "../../../atoms/selectedAtom";
 
 const PLACEHOLDER = [
   "eg. Get Coffee Beans",
@@ -45,12 +49,13 @@ const TextArea = styled.textarea`
 
 const NewTaskModal = () => {
   const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
-  const columns = useRecoilValue(columnsState);
+  const [columns, setColumns] = useRecoilState(columnsState);
+  const selectedBoard = useRecoilValue(selectedState);
 
   const [subTaskCount, setCount] = useState(1);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("");
+  const [title, setTitle] = useState(null);
+  const [description, setDescription] = useState(null);
+  const [status, setStatus] = useState(null);
 
   const onModalClose = useCallback(() => {
     setCount(1);
@@ -64,11 +69,8 @@ const NewTaskModal = () => {
     }
   }, [subTaskCount]);
 
-  const createTask = useCallback(() => {
-    console.log("title", title);
-    console.log("status", status);
-    if (!title || !status) alert("Title and status fields are required.");
-    console.log("Button Clicked");
+  const createTask = useCallback(async () => {
+    if (!title) alert("Title is required.");
     const subInputs = document.querySelectorAll("input[name='sub-task']");
     const subTasks = [];
     subInputs.forEach((subInput, i) => {
@@ -80,8 +82,49 @@ const NewTaskModal = () => {
         });
     });
 
-    console.table({ title, description, status, subTasks })
-  }, [title, status, description]);
+    try {
+      const response = await addDoc(collection(db, "tasks"), {
+        name: title,
+        description: description || null,
+        columnId: status || columns?.[0]?.id,
+        boardId: selectedBoard.id,
+        subTasks: subTasks,
+        timestamp: serverTimestamp(),
+      });
+      const dateTime = new Date();
+      const newTask = {
+        id: response.id,
+        name: title,
+        description: description || null,
+        columnId: status || columns?.[0]?.id,
+        boardId: selectedBoard.id,
+        subTasks: subTasks,
+        timestamp: { seconds: dateTime.getTime() / 1000 },
+      };
+      setColumns((old) => {
+        let clone = [...old];
+        const index = clone.findIndex(
+          (column) => column.id === newTask.columnId
+        );
+        let col = { ...clone[index] };
+        let items = [...col.items];
+        col.items = [...items, newTask];
+        clone[index] = col;
+        return clone;
+      });
+    } catch (error) {
+      console.error(error);
+    }
+    setOpenNewTask(false);
+  }, [
+    title,
+    status,
+    setOpenNewTask,
+    description,
+    columns,
+    selectedBoard,
+    setColumns,
+  ]);
 
   return (
     <Modal
@@ -125,7 +168,7 @@ const NewTaskModal = () => {
             <div>
               {[...new Array(subTaskCount)].map((item, i) => (
                 <InputField
-                  key={item}
+                  key={i}
                   containerMargin="4px 0"
                   name="sub-task"
                   placeholder={PLACEHOLDER[i] ?? "Caff - eind"}

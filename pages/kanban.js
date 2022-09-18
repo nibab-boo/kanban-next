@@ -117,6 +117,7 @@ const Kanban = () => {
       .then(data => setColumns(data.data))
       .catch(error => console.log("ERROR", error));
 
+    console.log("i")
   }, [selectedId, setColumns]);
 
   const createColumn = useCallback(async () => {
