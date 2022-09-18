@@ -3,6 +3,10 @@ import styled, { css } from 'styled-components';
 import { darkTheme } from '../../styles/color';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Button } from '../common/Button';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { newColumnModalState } from '../../atoms/newColumnModalAtom';
+import { columnsState } from '../../atoms/columnsAtom';
+import { newTaskModalState } from '../../atoms/newTaskModalAtom';
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -48,7 +52,8 @@ const PlayGround = styled.div`
 const Column = styled.div`
   width: 260px; 
   max-width: 70vw;
-  height: auto;
+  height: 100%;
+  grow: 1;
   
   ${props => props.addNew && css`
   background-color: ${darkTheme.sideBg};
@@ -111,33 +116,44 @@ const Card = styled.div`
 
 
 const MainPlayground = () => {
+  const [openNewColumn, setOpenNewColumnn] = useRecoilState(newColumnModalState);
+  const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
+  const columns = useRecoilValue(columnsState);  
+
   return (
     <MainPlayGroundContainer>
       <Heading>
         <h2 style={{margin: "0"}}>Daily Plans</h2>
         <Options>
-          <Button>+Add New Task</Button>
+          {columns.length > 0 && 
+            <Button onClick={() => setOpenNewTask(true)}>+Add New Task</Button>
+          }
           <MoreVertIcon />
         </Options>
       </Heading>
       <PlayGround>
-        <Column>
-          <Dot>TODO ( 4 )</Dot>
-          <Card>
-            Build UI for onboarding flow
-          </Card>
-          <Card>
-            Build UI for search
-          </Card>
-          <Card>
-            Build settings UI
-          </Card>
-          <Card>
-            QA and test all major user journeys
-          </Card>
-        </Column>
+        {
+          columns.map(column => (
+          <Column
+            key={column.id}          >
+            <Dot>{column.name} ( {column.items?.length ?? 0} )</Dot>
+            <Card>
+              Build UI for onboarding flow
+            </Card>
+            <Card>
+              Build UI for search
+            </Card>
+            <Card>
+              Build settings UI
+            </Card>
+            <Card>
+              QA and test all major user journeys
+            </Card>
+          </Column>
+          ))
+        }
 
-        <Column>
+        {/* <Column>
           <Dot>DOING ( 6 )</Dot>
           <Card>
             Design settings and search pages
@@ -227,10 +243,13 @@ const MainPlayground = () => {
           <Card>
             Research pricing points of various competitors and trial different business models
           </Card>
-        </Column>
+        </Column> */}
 
         {/* Add New Column */}
-        <Column addNew>
+        <Column
+          addNew
+          onClick={() => setOpenNewColumnn(true)}
+        >
           <Card addNew>
             +New Column
           </Card>

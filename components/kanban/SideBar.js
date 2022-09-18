@@ -9,7 +9,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import Switch from "@mui/material/Switch";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { modalState } from "../../atoms/modalAtom";
+import { newProjectModalState } from "../../atoms/newProjectModalAtom.js";
 import { projectsState } from "../../atoms/projectsAtoms";
 import { selectedState } from "../../atoms/selectedAtom";
 import { useCallback } from "react";
@@ -104,7 +104,7 @@ const ToogleShow = styled.div`
 `;
 
 const SideBar = () => {
-  const [open, setOpen] = useRecoilState(modalState);
+  const [open, setOpen] = useRecoilState(newProjectModalState);
   const projects = useRecoilValue(projectsState);
   const [selectedId, setSelectedId] = useRecoilState(selectedState);
 
@@ -124,7 +124,7 @@ const SideBar = () => {
       </LogoBox>
       <SideBarContent>
         <Boards>
-          <SecondaryTitle>All Boards ( {projects.count} )</SecondaryTitle>
+          <SecondaryTitle>All Boards ( {projects.length} )</SecondaryTitle>
           {projects.map((project) => (
             <Board
               key={project.id}

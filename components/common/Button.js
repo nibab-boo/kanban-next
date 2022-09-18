@@ -19,6 +19,10 @@ export const Button = styled.button`
    `}
 
     ${props => props.margin && `
-      margin: ${props.margin}
+      margin: ${props.margin};
+    `}
+    ${props => props.addSubTask && `
+      background: white;
+      color: ${darkTheme.buttonBg};
     `}
    `

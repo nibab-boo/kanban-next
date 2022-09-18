@@ -1,13 +1,13 @@
 import styled, { css } from 'styled-components';
 import { darkTheme } from '../../styles/color';
 
-const InputContainer = styled.div`
+export const InputContainer = styled.div`
   ${props => props.margin && `
     margin: ${props.margin};
   `}
   `;
   
-const Label = styled.label`
+export const Label = styled.label`
   margin-bottom: .9rem;
   font-size: .9rem;
   ${props => props.fontSize && `
@@ -27,6 +27,9 @@ const Input = styled.input`
   background: ${darkTheme.sideBg};
   width: 100%;
   font-size: 1rem;
+  ${props => props.margin && `
+    margin: ${props.margin}
+  `}
 `
 
 const InputField = ({
@@ -36,16 +39,18 @@ const InputField = ({
   name="input",
   label,
   placeholder="",
+  inputMargin = "0",
   ...props
 }) => {
   return (
     <InputContainer margin={containerMargin}>
-      <Label htmlFor={name} labelSize={labelSize} block={block}>
+      {label && <Label htmlFor={name} labelSize={labelSize} block={block}>
         {label}
-      </Label>
+      </Label>}
       <Input 
         name={name}
         placeholder={placeholder}
+        inputMargin={inputMargin}
         {...props}
       />
     </InputContainer>
