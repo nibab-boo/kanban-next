@@ -21,33 +21,41 @@ const PLACEHOLDER = [
 const Select = styled.select`
   width: 100%;
   margin-top: 1rem;
-  padding: 8px 14px;
-  border: none;
   border-radius: 4px;
   background-color: ${darkTheme.sideBg};
+  padding: 8px 14px;
   border: 2px solid ${darkTheme.secondaryText};
-  color: white;
+  color: ${darkTheme.primaryText};
 `;
-const Option = styled.option``;
+
+const Option = styled.option`
+  padding: 8px 14px;
+  border: 2px solid ${darkTheme.secondaryText};
+  color: ${darkTheme.primaryText};
+`;
 
 const TextArea = styled.textarea`
-  width: 100%,
-  padding: 10px,
-  color: ${darkTheme.primaryText},
-  background: ${darkTheme.sideBg},
-  border: 2px solid ${darkTheme.secondaryText},
-  borderRadius: 4px,
-`
+  width: 100%;
+  padding: 10px;
+  color: ${darkTheme.primaryText};
+  background: ${darkTheme.sideBg};
+  border: 2px solid ${darkTheme.secondaryText};
+  borderradius: 4px;
+`;
 
 const NewTaskModal = () => {
   const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
-  const [subTaskCount, setCount] = useState(1);
   const columns = useRecoilValue(columnsState);
+
+  const [subTaskCount, setCount] = useState(1);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("");
 
   const onModalClose = useCallback(() => {
     setCount(1);
     setOpenNewTask(false);
-  }, [setOpenNewTask])
+  }, [setOpenNewTask]);
 
   const addSubTask = useCallback(() => {
     const subInput = document.querySelectorAll("input[name='sub-task']");
@@ -55,6 +63,25 @@ const NewTaskModal = () => {
       setCount(subTaskCount + 1);
     }
   }, [subTaskCount]);
+
+  const createTask = useCallback(() => {
+    console.log("title", title);
+    console.log("status", status);
+    if (!title || !status) alert("Title and status fields are required.");
+    console.log("Button Clicked");
+    const subInputs = document.querySelectorAll("input[name='sub-task']");
+    const subTasks = [];
+    subInputs.forEach((subInput, i) => {
+      if (subInput.value)
+        subTasks.push({
+          id: i,
+          name: subInput.value,
+          status: false,
+        });
+    });
+
+    console.table({ title, description, status, subTasks })
+  }, [title, status, description]);
 
   return (
     <Modal
@@ -74,24 +101,22 @@ const NewTaskModal = () => {
         </Typography>
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           <InputField
-            name="board_name"
+            name="task_name"
             label="Title"
             containerMargin="1rem auto 0"
             placeholder="eg. Web Design"
-            onChange={(e) => setKeyword(e?.target?.value ?? "")}
+            onChange={(e) => setTitle(e?.target?.value ?? "")}
+            required
           />
           <InputContainer margin="1rem auto 0">
-            <Label
-              htmlFor={"description"}
-              labelSize="0.9rem"
-              block="inline-block"
-            >
+            <Label htmlFor={"description"} labelSize="0.9rem" block="block">
               Description
             </Label>
             <TextArea
-              rows={3}
+              rows={4}
+              onChange={(e) => setDescription(e?.target?.value ?? "")}
               placeholder="W Web Design Web Design Web Design Web Design Web Designeb Design Web Design Web Design Web Design"
-            ></TextArea>
+            />
           </InputContainer>
           <InputContainer margin="1rem auto 0">
             <Label htmlFor="sub-task" labelSize="0.9rem" block="inline-block">
@@ -118,7 +143,7 @@ const NewTaskModal = () => {
             <Select
               id="status"
               name="status"
-              onChange={(e) => console.log("Current Target :---: ", e.currentTarget.value)}
+              onChange={(e) => setStatus(e?.target?.value ?? "")}
             >
               {columns.map((column) => (
                 <Option key={column.id} value={column.id}>
@@ -127,11 +152,7 @@ const NewTaskModal = () => {
               ))}
             </Select>
           </InputContainer>
-          <Button
-            fullSize
-            margin="2rem auto 0"
-            onClick={() => console.log("Button clicked!!!")}
-          >
+          <Button fullSize margin="2rem auto 0" onClick={createTask}>
             Create Task
           </Button>
         </Typography>

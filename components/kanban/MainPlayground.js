@@ -7,6 +7,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { newColumnModalState } from '../../atoms/newColumnModalAtom';
 import { columnsState } from '../../atoms/columnsAtom';
 import { newTaskModalState } from '../../atoms/newTaskModalAtom';
+import { selectedState } from '../../atoms/selectedAtom';
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -118,12 +119,13 @@ const Card = styled.div`
 const MainPlayground = () => {
   const [openNewColumn, setOpenNewColumnn] = useRecoilState(newColumnModalState);
   const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
-  const columns = useRecoilValue(columnsState);  
+  const columns = useRecoilValue(columnsState);
+  const selectedId = useRecoilValue(selectedState);
 
   return (
     <MainPlayGroundContainer>
       <Heading>
-        <h2 style={{margin: "0"}}>Daily Plans</h2>
+        <h2 style={{margin: "0"}}>{selectedId?.name ?? "selected/create a board"}</h2>
         <Options>
           {columns.length > 0 && 
             <Button onClick={() => setOpenNewTask(true)}>+Add New Task</Button>
