@@ -71,7 +71,6 @@ const Kanban = () => {
       return 0;
     });
 
-    console.log("PROJECTS :---: ", allProjects);
     setProjects(allProjects ?? []);
   }, [session, setProjects]);
 
@@ -93,7 +92,6 @@ const Kanban = () => {
         timestamp: { seconds: dateTime.getTime() / 1000}
       };
 
-      console.log("New PROJECT", newProject);
       setProjects(() => [...projects, newProject]);
       setSelectedId(newProject ?? selectedId);
     } catch (error) {
@@ -110,14 +108,16 @@ const Kanban = () => {
     setProjects,
   ]);
 
+
+  // Need to move it into MainPlayground
   useEffect(() => {
-    if (!selectedId?.id) return;
+    if (!selectedId || !selectedId.id) return;
     fetch("/api/boards/" + selectedId.id)
       .then(res => res.json())
-      .then(data => setColumns(data.data))
+      .then(data => {
+        setColumns(data.data || [])})
       .catch(error => console.log("ERROR", error));
 
-    console.log("i")
   }, [selectedId, setColumns]);
 
   const createColumn = useCallback(async () => {
@@ -166,7 +166,7 @@ const Kanban = () => {
       {/* SIDEBAR */}
       <SideBar />
       {/* MAINPLAYGROUND */}
-      <MainPlayground />
+      <MainPlayground/>
       <AddModal 
         title="Add New Board"
         ButtonText="Create New Board"

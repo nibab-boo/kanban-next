@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { darkTheme } from '../../styles/color';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -100,7 +100,7 @@ const Card = styled.div`
   font-weight: 500;
   background: ${darkTheme.sideBg};
   margin: 1rem auto;
-  padding: 1.5rem 1rem;
+  padding: 1.2rem 1rem;
   color: ${darkTheme.primaryText};
 
   border-radius: .8rem;
@@ -120,12 +120,16 @@ const MainPlayground = () => {
   const [openNewColumn, setOpenNewColumnn] = useRecoilState(newColumnModalState);
   const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
   const columns = useRecoilValue(columnsState);
-  const selectedId = useRecoilValue(selectedState);
+  const selectedBoard = useRecoilValue(selectedState);
+
+  const doneCount = useCallback((subTasks) =>
+     subTasks.filter(subTask => subTask.status).length
+  ,[])
 
   return (
     <MainPlayGroundContainer>
       <Heading>
-        <h2 style={{margin: "0"}}>{selectedId?.name ?? "selected/create a board"}</h2>
+        <h2 style={{margin: "0"}}>{selectedBoard?.name ?? "selected/create a board"}</h2>
         <Options>
           {columns.length > 0 && 
             <Button onClick={() => setOpenNewTask(true)}>+Add New Task</Button>
@@ -134,119 +138,23 @@ const MainPlayground = () => {
         </Options>
       </Heading>
       <PlayGround>
+        {/* Previous Columns */}
         {
           columns.map(column => (
           <Column
             key={column.id}          >
             <Dot>{column.name} ( {column.items?.length ?? 0} )</Dot>
-            <Card>
-              Build UI for onboarding flow
-            </Card>
-            <Card>
-              Build UI for search
-            </Card>
-            <Card>
-              Build settings UI
-            </Card>
-            <Card>
-              QA and test all major user journeys
-            </Card>
+            {column.items.map((card) => 
+            (<Card key={card.id}>
+              {card.name}
+              <br />
+              <p style={{color: darkTheme.secondaryText}}>
+                {!!card.subTasks.length && `${doneCount(card.subTasks)} of ${card.subTasks.length} sub-tasks`}
+              </p>
+            </Card>))}
           </Column>
           ))
         }
-
-        {/* <Column>
-          <Dot>DOING ( 6 )</Dot>
-          <Card>
-            Design settings and search pages
-          </Card>
-          <Card>
-            Design onboarding flow
-          </Card>
-          <Card>
-            Add search endpoints
-          </Card>
-          <Card>
-            Research pricing points of various competitors and trial different business models
-          </Card>
-          <Card>
-            Design settings and search pages
-          </Card>
-          <Card>
-            Design onboarding flow
-          </Card>
-          <Card>
-            Add search endpoints
-          </Card>
-          <Card>
-            Research pricing points of various competitors and trial different business models
-          </Card>
-        </Column>
-
-        <Column>
-          <Dot>DOING ( 6 )</Dot>
-          <Card>
-            Design settings and search pages
-          </Card>
-          <Card>
-            Design onboarding flow
-          </Card>
-          <Card>
-            Add search endpoints
-          </Card>
-          <Card>
-            Research pricing points of various competitors and trial different business models
-          </Card>
-        </Column>
-
-        <Column>
-          <Dot>DOING ( 6 )</Dot>
-          <Card>
-            Design settings and search pages
-          </Card>
-          <Card>
-            Design onboarding flow
-          </Card>
-          <Card>
-            Add search endpoints
-          </Card>
-          <Card>
-            Research pricing points of various competitors and trial different business models
-          </Card>
-        </Column>
-        
-        <Column>
-          <Dot>DOING ( 6 )</Dot>
-          <Card>
-            Design settings and search pages
-          </Card>
-          <Card>
-            Design onboarding flow
-          </Card>
-          <Card>
-            Add search endpoints
-          </Card>
-          <Card>
-            Research pricing points of various competitors and trial different business models
-          </Card>
-        </Column>
-
-        <Column>
-          <Dot>DOING ( 6 )</Dot>
-          <Card>
-            Design settings and search pages
-          </Card>
-          <Card>
-            Design onboarding flow
-          </Card>
-          <Card>
-            Add search endpoints
-          </Card>
-          <Card>
-            Research pricing points of various competitors and trial different business models
-          </Card>
-        </Column> */}
-
         {/* Add New Column */}
         <Column
           addNew
