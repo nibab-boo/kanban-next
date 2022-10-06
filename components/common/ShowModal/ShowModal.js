@@ -57,22 +57,21 @@ const ShowModal = () => {
   }, [setShowTask])
 
   const beforeClose = useCallback(() => {
-    const docRef = doc(db, "tasks", showTask.id)
-    console.log("SENDING IT.")
-    setDoc(docRef, showTask, { merge: true })
-      .then((docRef) => console.log("Response of Update :---:", docRef))
-      .catch(error => console.log('Error :---: ', error));
-    setShowTask(null)
+    return null;
+    // const docRef = doc(db, "tasks", showTask.id)
+    // setDoc(docRef, showTask, { merge: true })
+    //   .then((docRef) => console.log("Response of Update :---:", docRef))
+    //   .catch(error => console.log('Error :---: ', error));
+    // setShowTask(null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setShowTask, showTask])
 
-  console.log("Task :---: ", showTask);
-  if (!showTask) return <></>;
+  // if (!showTask) return <></>;
 
   return (
     <Modal
-      open={!!showTask}
-      // open={openNewTask}
-      // onClose={onModalClose}
+      open={!!true}
+      // open={!!showTask}
       onClose={beforeClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
@@ -84,12 +83,13 @@ const ShowModal = () => {
           component="h2"
           style={{ fontWeight: "600" }}
         >
-          {showTask?.name}
+          {showTask?.name ?? "THIS IS A TITLE"}
         </Typography>
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           {showTask?.description && (
-            <Description>Task Descriptions if There is any</Description>
-          )}
+            <Description>{showTask?.description ?? 'Task Descriptions if There is any'}</Description>
+            )}
+            <Description>{showTask?.description ?? 'Task Descriptions if There is any'}</Description>
           {showTask && !!showTask?.subTasks?.length && (
             <>
               <Label>
@@ -128,11 +128,12 @@ const ShowModal = () => {
               name="status"
               onChange={(e) => changeTaskStatus(e?.target?.value)}
             >
-              {columns.map((column) => (
+              {columns.map((column, index) => 
+                (
                 <Option
                   key={column.id}
                   value={column.id}
-                  selected={selectedTask?.columnId === column.id}
+                  selected={column.id == showTask.columnId}
                 >
                   {column.name}
                 </Option>
