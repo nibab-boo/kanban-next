@@ -18,7 +18,7 @@ export const Label = styled.label`
   `}
 `;
 
-const Input = styled.input`
+export const Input = styled.input`
   padding: 10px;
   border: 2px solid ${darkTheme.secondaryText};
   font-weight: 500;
@@ -29,6 +29,9 @@ const Input = styled.input`
   font-size: 1rem;
   ${props => props.margin && `
     margin: ${props.margin}
+  `}
+  ${props => props.width && `
+    width: ${props.width}
   `}
 `
 

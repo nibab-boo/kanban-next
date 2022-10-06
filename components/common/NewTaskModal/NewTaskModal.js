@@ -22,7 +22,7 @@ const PLACEHOLDER = [
   "eg. Drink Coffee and smile",
 ];
 
-const Select = styled.select`
+export const Select = styled.select`
   width: 100%;
   margin-top: 1rem;
   border-radius: 4px;
@@ -32,7 +32,7 @@ const Select = styled.select`
   color: ${darkTheme.primaryText};
 `;
 
-const Option = styled.option`
+export const Option = styled.option`
   padding: 8px 14px;
   border: 2px solid ${darkTheme.secondaryText};
   color: ${darkTheme.primaryText};

@@ -25,6 +25,7 @@ import { newColumnModalState } from "../atoms/newColumnModalAtom";
 import AddModal from "../components/common/AddModal/AddModal";
 import { columnsState } from "../atoms/columnsAtom";
 import NewTaskModal from "../components/common/NewTaskModal/NewTaskModal";
+import ShowModal from "../components/common/ShowModal/ShowModal";
 
 const Container = styled.div`
   display: flex;
@@ -153,9 +154,10 @@ const Kanban = () => {
     fetchProjects();
   }, [fetchProjects, session]);
 
-  if (status === "loading") return <p>Loading.....</p>;
-
+  
+  // if (status === "loading") return <p>Loading.....</p>;
   if (status === "unauthenticated") Router.push("/");
+
 
   return (
     <Container>
@@ -183,6 +185,7 @@ const Kanban = () => {
         openStatus={openNewColumn}
         onClose={() => setOpenNewColumn(false)}
       />
+      <ShowModal />
       <NewTaskModal />
     </Container>
   );

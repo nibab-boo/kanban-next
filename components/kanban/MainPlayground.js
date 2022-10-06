@@ -8,6 +8,8 @@ import { newColumnModalState } from '../../atoms/newColumnModalAtom';
 import { columnsState } from '../../atoms/columnsAtom';
 import { newTaskModalState } from '../../atoms/newTaskModalAtom';
 import { selectedState } from '../../atoms/selectedAtom';
+import { selectedTask } from '../../atoms/selectedTask';
+import { doneCount } from '../../services/doneCount';
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -121,10 +123,7 @@ const MainPlayground = () => {
   const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
   const columns = useRecoilValue(columnsState);
   const selectedBoard = useRecoilValue(selectedState);
-
-  const doneCount = useCallback((subTasks) =>
-     subTasks.filter(subTask => subTask.status).length
-  ,[])
+  const [showTask, setShowTask] = useRecoilState(selectedTask);
 
   return (
     <MainPlayGroundContainer>
@@ -145,7 +144,9 @@ const MainPlayground = () => {
             key={column.id}          >
             <Dot>{column.name} ( {column.items?.length ?? 0} )</Dot>
             {column.items.map((card) => 
-            (<Card key={card.id}>
+            (<Card key={card.id} 
+              onClick={() => setShowTask(card)}
+            >
               {card.name}
               <br />
               <p style={{color: darkTheme.secondaryText}}>
