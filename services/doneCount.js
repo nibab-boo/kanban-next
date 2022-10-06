@@ -1,0 +1,1 @@
+export const doneCount = (subTasks) => subTasks?.filter(subTask => subTask.status).length;
