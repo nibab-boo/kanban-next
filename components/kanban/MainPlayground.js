@@ -10,6 +10,13 @@ import { newTaskModalState } from '../../atoms/newTaskModalAtom';
 import { selectedState } from '../../atoms/selectedAtom';
 import { selectedTask } from '../../atoms/selectedTask';
 import { doneCount } from '../../services/doneCount';
+import { signOut } from "next-auth/react"
+
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { db } from '../../core/firebase';
+import { projectsState } from '../../atoms/projectsAtoms';
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -121,19 +128,68 @@ const Card = styled.div`
 const MainPlayground = () => {
   const [openNewColumn, setOpenNewColumnn] = useRecoilState(newColumnModalState);
   const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
+  const [projects, setProjects] = useRecoilState(projectsState);
   const columns = useRecoilValue(columnsState);
-  const selectedBoard = useRecoilValue(selectedState);
+  const [selectedBoard, setSelectedBoard] = useRecoilState(selectedState);
   const [showTask, setShowTask] = useRecoilState(selectedTask);
+
+  // Menu code
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  // Close menu
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  // Delete Board
+  const handleDeleteBoard = useCallback(() => {
+    if (!selectedBoard?.id) return;
+    const docRef = doc(db, 'projects', selectedBoard.id)
+    deleteDoc(docRef)
+      .then(() => {
+        let newProjects = [];
+
+        // filter oldProjects
+        setProjects((oldProjects) => {
+          newProjects = oldProjects.filter((oldProject) => selectedBoard.id !== oldProject.id);
+          return newProjects;
+        });
+        
+        // Set 1st project as selected project.
+        if (newProjects?.length > 0) setSelectedBoard(newProjects?.[0]);
+      })
+      .catch(error => {
+        console.error("Error while Deleting Board :---: ", error);
+      })
+      handleClose();
+  }, [selectedBoard.id, setProjects, setSelectedBoard])
 
   return (
     <MainPlayGroundContainer>
       <Heading>
-        <h2 style={{margin: "0"}}>{selectedBoard?.name ?? "selected/create a board"}</h2>
+        <h2 style={{margin: "0"}}>{selectedBoard?.name ?? "selected a board"}</h2>
         <Options>
           {columns.length > 0 && 
             <Button onClick={() => setOpenNewTask(true)}>+Add New Task</Button>
           }
-          <MoreVertIcon />
+          <MoreVertIcon onClick={handleClick}/>
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            MenuListProps={{
+              'aria-labelledby': 'basic-button',
+            }}
+          >
+            <MenuItem onClick={handleDeleteBoard}>Delete Board</MenuItem>
+            <MenuItem onClick={handleClose}>Delete Column</MenuItem>
+            <MenuItem onClick={() => signOut()}>Logout</MenuItem>
+          </Menu>
         </Options>
       </Heading>
       <PlayGround>

@@ -66,11 +66,11 @@ const ShowModal = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setShowTask, showTask])
 
-  // if (!showTask) return <></>;
+  if (!showTask) return <></>;
 
   return (
     <Modal
-      open={!!true}
+      open={!!showTask}
       // open={!!showTask}
       onClose={beforeClose}
       aria-labelledby="modal-modal-title"
