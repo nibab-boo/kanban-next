@@ -11,11 +11,14 @@ import { selectedState } from "../../atoms/selectedAtom";
 import { selectedTask } from "../../atoms/selectedTask";
 import { doneCount } from "../../services/doneCount";
 import { signOut } from "next-auth/react";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { projectsState } from "../../atoms/projectsAtoms";
-import { deleteReferences } from "../../utils/request";
+import { deleteReferences, updateDocument } from "../../utils/request";
+import { canEditColumnState } from "../../atoms/canEditColumnAtom";
+import { Input } from "../common/InputField";
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -131,9 +134,10 @@ const MainPlayground = () => {
     useRecoilState(newColumnModalState);
   const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
   const [projects, setProjects] = useRecoilState(projectsState);
-  const columns = useRecoilValue(columnsState);
+  const [columns, setColumns] = useRecoilState(columnsState);
   const [selectedBoard, setSelectedBoard] = useRecoilState(selectedState);
   const [showTask, setShowTask] = useRecoilState(selectedTask);
+  const [canEditCol, setCanEditCol] = useRecoilState(canEditColumnState);
 
   // Menu code
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -151,11 +155,11 @@ const MainPlayground = () => {
   const handleDeleteBoard = useCallback(() => {
     if (!selectedBoard?.id) return;
     const references = [`projects/${selectedBoard.id}`];
-    
-    // Looping to get all ids 
+
+    // Looping to get all ids
     columns.forEach((column) => {
       column?.items.forEach((task) => {
-        references.push(`tasks/${task.id}`)
+        references.push(`tasks/${task.id}`);
       });
       references.push(`projects/${column.boardId}/columns/${column.id}`);
     });
@@ -163,22 +167,46 @@ const MainPlayground = () => {
     // Making a call
     deleteReferences(references)
       .then((data) => {
-        console.log(' Data ', data);
+        console.log(" Data ", data);
         let newProjects = [];
         // Removing Deleted Project
         setProjects((oldProjects) => {
           newProjects = oldProjects.filter(
             (oldProject) => selectedBoard.id !== oldProject.id
-            );
-            return newProjects;
-          });
-          
-          // Set 1st project as selected project.
+          );
+          return newProjects;
+        });
+
+        // Set 1st project as selected project.
         if (newProjects?.length > 0) setSelectedBoard(newProjects?.[0]);
       })
       .catch((error) => console.log("DELETE FAILED :---: ", error));
     handleClose();
   }, [columns, selectedBoard, setProjects, setSelectedBoard]);
+
+  // OnBlur in InputField
+  const checkAndUpdate = useCallback(
+    (newValue, columnId) => {
+      if (!columnId || !selectedBoard?.id) return;
+      if (columns.find((col) => col.id === columnId)?.name !== newValue) {
+        updateDocument(`projects/${selectedBoard?.id}/columns/${columnId}`, {
+          name: newValue,
+        }).then((data) => {
+          // Change Columns.find(columnId).name = newValue
+          setColumns((oldColumns) => {
+            const newCols = [];
+            oldColumns.forEach((col) => {
+              col.id === columnId
+                ? newCols.push({ ...col, name: newValue })
+                : newCols.push(col);
+            });
+            return newCols;
+          });
+        });
+      }
+    },
+    [columns, selectedBoard?.id, setColumns]
+  );
 
   return (
     <MainPlayGroundContainer>
@@ -201,7 +229,15 @@ const MainPlayground = () => {
             }}
           >
             <MenuItem onClick={handleDeleteBoard}>Delete Board</MenuItem>
-            <MenuItem onClick={handleClose}>Delete Column</MenuItem>
+            {!!canEditCol ? (
+              <MenuItem onClick={() => setCanEditCol(false)}>
+                Edit Done
+              </MenuItem>
+            ) : (
+              <MenuItem onClick={() => setCanEditCol(true)}>
+                Edit Column
+              </MenuItem>
+            )}
             <MenuItem onClick={() => signOut()}>Logout</MenuItem>
           </Menu>
         </Options>
@@ -210,10 +246,23 @@ const MainPlayground = () => {
         {/* Previous Columns */}
         {columns.map((column) => (
           <Column key={column.id}>
-            <Dot>
-              {column.name} ( {column.items?.length ?? 0} )
-            </Dot>
-            {column.items.map((card) => (
+            {canEditCol ? (
+              <div style={{display: 'flex', alignItems: "center", gap: "1rem"}}>
+                <Input
+                  style={{ padding: "4px", fontSize: ".8rem", border: "none" }}
+                  defaultValue={column.name}
+                  onBlur={(e) =>
+                    checkAndUpdate(e.currentTarget.value || "", column.id)
+                  }
+                  />
+                  <DeleteIcon style={{color: "red", fontSize: "1rem", cursor: "pointer"}} onClick={() => deleteCol(column.id)}/>
+                </div>
+            ) : (
+              <Dot>
+                {column.name} ( {column.items?.length ?? 0} )
+              </Dot>
+            )}
+            {column?.items?.map((card) => (
               <Card key={card.id} onClick={() => setShowTask(card)}>
                 {card.name}
                 <br />
