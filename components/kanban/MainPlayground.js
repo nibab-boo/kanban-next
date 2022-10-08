@@ -208,6 +208,20 @@ const MainPlayground = () => {
     [columns, selectedBoard?.id, setColumns]
   );
 
+  // Delete Col along with all task
+  const deleteCol = useCallback((columnId) => {
+    const column = columns.find((col) => col.id === columnId);
+    if (!!column) return;
+    const references = [`projects/${column?.boardId}/columns/${column.id}`];
+    column?.items?.forEach((task) => {
+      references.push(`tasks/${task.id}`);
+    })
+    deleteReferences(references)
+      .then((res) => {
+        setColumns((oldColumns) => oldColumns.filter((col) => col.id !== column.id))
+      }).catch((error) => console.error("Error deleting COl :---:", error));
+  }, [columns, setColumns])
+
   return (
     <MainPlayGroundContainer>
       <Heading>
