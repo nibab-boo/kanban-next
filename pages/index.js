@@ -4,7 +4,7 @@ import styles from '../styles/Home.module.css'
 import { authOptions } from './api/auth/[...nextauth]'
 import { unstable_getServerSession } from 'next-auth'
 import Router from 'next/router'
-import { useSession } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
 export default function Home() {

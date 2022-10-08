@@ -142,6 +142,7 @@ const Kanban = () => {
         name: columnName,
         userId: session?.user?.id,
         boardId: selectedId?.id,
+        items: [],
         timestamp: { seconds: dateTime.getTime() / 1000},
       }
       setColumns([...columns, newCol]);
