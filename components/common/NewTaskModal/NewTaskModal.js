@@ -14,7 +14,7 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../core/firebase";
 import { selectedState } from "../../../atoms/selectedAtom";
 
-const PLACEHOLDER = [
+export const PLACEHOLDER = [
   "eg. Get Coffee Beans",
   "eg. Roast Them",
   "eg. Grind them",

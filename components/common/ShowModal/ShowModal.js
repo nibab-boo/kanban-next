@@ -4,8 +4,13 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import React from "react";
 import { useRecoilState } from "recoil";
 import { columnsState } from "../../../atoms/columnsAtom";
-import { Input, InputContainer, Label } from "../InputField";
-import { Option, Select, TextArea } from "../NewTaskModal/NewTaskModal";
+import InputField, { Input, InputContainer, Label } from "../InputField";
+import {
+  Option,
+  PLACEHOLDER,
+  Select,
+  TextArea,
+} from "../NewTaskModal/NewTaskModal";
 import { modalStyle } from "../AddModal/AddModal";
 import { darkTheme } from "../../../styles/color";
 import styled from "styled-components";
@@ -16,6 +21,9 @@ import { canEditTaskState } from "../../../atoms/canEditTaskState";
 import { BorderColorOutlined, DeleteOutline } from "@mui/icons-material";
 import { deleteDocument, updateDocument } from "../../../utils/request";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useRef } from "react";
+import { Button } from "../Button";
+import DoneIcon from '@mui/icons-material/Done';
 
 const SubTaskCover = styled.div`
   background-color: ${darkTheme.bodyBg};
@@ -47,10 +55,19 @@ const ShowModal = () => {
   const [showTask, setShowTask] = useRecoilState(selectedTask);
   const [subTasks, setSubTasks] = useState([]);
   const [canEditTask, setCanEditTask] = useRecoilState(canEditTaskState);
+  const [subTaskCount, setCount] = useState(1);
 
   useEffect(() => {
     if (showTask) setSubTasks([...showTask.subTasks]);
   }, [showTask]);
+
+  // New SUBTASK
+  const addSubTask = useCallback(() => {
+    const subInput = document.querySelectorAll("input[name='sub-task']");
+    if (subInput[subTaskCount - 1].value) {
+      setCount(subTaskCount + 1);
+    }
+  }, [subTaskCount]);
 
   const changeSubTaskStatus = useCallback(
     (clickedSubTask) => {
@@ -78,8 +95,28 @@ const ShowModal = () => {
   );
 
   const saveTask = useCallback(() => {
+    if (!showTask.name) {
+      alert("Name cannot be empty.");
+      return;
+    }
     handleClose();
-    updateDocument(`tasks/${showTask.id}`, showTask)
+    // Checking for
+    const subInputs = document.querySelectorAll("input[name='sub-task']");
+    const subTasks = [];
+    subInputs?.forEach((subInput, i) => {
+      if (subInput.value)
+        subTasks.push({
+          id: Date.now() + i,
+          name: subInput.value,
+          status: false,
+        });
+    });
+    const newShowTask =
+      subTasks.length > 0
+        ? { ...showTask, subTasks: [...showTask.subTasks, ...subTasks] }
+        : showTask;
+    if (subTasks.length > 0) setShowTask(newShowTask);
+    updateDocument(`tasks/${showTask.id}`, newShowTask)
       .then((res) => {
         // Change Task in Column
         setColumns((oldColumns) => {
@@ -89,7 +126,7 @@ const ShowModal = () => {
               const newTasks = [];
               oldCol?.items?.forEach((task) =>
                 task.id === showTask.id
-                  ? newTasks.push(showTask)
+                  ? newTasks.push(newShowTask)
                   : newTasks.push(task)
               );
               newCols.push({ ...oldCol, items: newTasks });
@@ -97,6 +134,7 @@ const ShowModal = () => {
               newCols.push(oldCol);
             }
           });
+          return newCols;
         });
       })
       .catch((error) => {
@@ -105,15 +143,17 @@ const ShowModal = () => {
         showTask((oldTask) => {
           const myCol = columns.find((col) => col.id === showTask.columnId);
           return myCol?.items?.find((task) => task.id === showTask.id);
-        })
+        });
         // Revert Back showTask
       });
     setCanEditTask(false);
-  }, [columns, handleClose, setCanEditTask, setColumns, showTask]);
+  }, [columns, handleClose, setCanEditTask, setColumns, setShowTask, showTask]);
+
+  console.log('TASK :---: ', showTask);
 
   const beforeClose = useCallback(() => {
     if (changeData.current) {
-      saveTask;
+      saveTask();
       changeData.current = false;
     }
     setShowTask(null);
@@ -220,7 +260,7 @@ const ShowModal = () => {
               }}
             >
               {!!canEditTask ? (
-                <MenuItem onClick={saveTask}>Save</MenuItem>
+                <MenuItem onClick={saveTask}><DoneIcon/> Save</MenuItem>
               ) : (
                 <>
                   <MenuItem onClick={handleDeleteTask}>
@@ -301,6 +341,32 @@ const ShowModal = () => {
                     </Label>
                   </SubTaskCover>
                 ))}
+                {canEditTask && (
+                  <>
+                    <div>
+                      {[...new Array(subTaskCount)].map((item, i) => (
+                        <InputField
+                          style={{
+                            padding: "4px",
+                            fontSize: ".8rem",
+                          }}
+                          key={i}
+                          containerMargin="4px 0"
+                          name="sub-task"
+                          placeholder={PLACEHOLDER[i] ?? "Caff - eind"}
+                        />
+                      ))}
+                    </div>
+                    <Button
+                      fullSize
+                      addSubTask
+                      margin="1rem auto 0"
+                      onClick={addSubTask}
+                    >
+                      + Add New Subtask
+                    </Button>
+                  </>
+                )}
               </InputContainer>
             </>
           )}
