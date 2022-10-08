@@ -1,7 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import Button from '../components/shared/Button'
 import { authOptions } from './api/auth/[...nextauth]'
 import { unstable_getServerSession } from 'next-auth'
 import Router from 'next/router'
@@ -24,7 +23,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <Button />
+        <button onClick={() => signIn()}>Sign in</button>
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
