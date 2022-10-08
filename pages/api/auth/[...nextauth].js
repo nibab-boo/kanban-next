@@ -4,8 +4,7 @@ import { FirestoreAdapter } from "@next-auth/firebase-adapter"
 import { firebaseConfig, db } from "../../../core/firebase"
 import { getDoc, collection, serverTimestamp } from 'firebase/firestore'
 
-
-export default NextAuth({
+export const authOptions = {
   adapter: FirestoreAdapter(firebaseConfig),
   // Configure one or more authentication providers
   providers: [
@@ -42,4 +41,6 @@ export default NextAuth({
     }
   },
   secret: process.env.NEXTAUTH_SECRET
-})
+}
+
+export default NextAuth(authOptions)

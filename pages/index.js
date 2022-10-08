@@ -2,8 +2,19 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Button from '../components/shared/Button'
+import { authOptions } from './api/auth/[...nextauth]'
+import { unstable_getServerSession } from 'next-auth'
+import Router from 'next/router'
+import { useSession } from 'next-auth/react'
+import { useEffect } from 'react'
 
 export default function Home() {
+  const { data: {user}, status} = useSession();
+
+  useEffect(() => {
+    if (user && user.id) Router.push('/kanban');
+  }, [user])
+
   return (
     <div className={styles.container}>
       <Head>
@@ -68,4 +79,16 @@ export default function Home() {
       </footer>
     </div>
   )
+}
+
+export async function getServerSideProps(context) {
+  return {
+    props: {
+      session: await unstable_getServerSession(
+        context.req,
+        context.res,
+        authOptions
+      ),
+    },
+  }
 }

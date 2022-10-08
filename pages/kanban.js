@@ -26,6 +26,8 @@ import AddModal from "../components/common/AddModal/AddModal";
 import { columnsState } from "../atoms/columnsAtom";
 import NewTaskModal from "../components/common/NewTaskModal/NewTaskModal";
 import ShowModal from "../components/common/ShowModal/ShowModal";
+import { authOptions } from "./api/auth/[...nextauth]";
+import { unstable_getServerSession } from "next-auth";
 
 const Container = styled.div`
   display: flex;
@@ -51,6 +53,7 @@ const Kanban = () => {
       collection(db, "projects"),
       where("userId", "==", session?.user?.id ?? "")
     );
+
 
     const projectSnapshot = await getDocs(q);
 
@@ -192,3 +195,15 @@ const Kanban = () => {
 };
 
 export default Kanban;
+
+export async function getServerSideProps(context) {
+  return {
+    props: {
+      session: await unstable_getServerSession(
+        context.req,
+        context.res,
+        authOptions
+      ),
+    },
+  }
+}
