@@ -1,8 +1,14 @@
-import { db } from "../../../core/firebase";
-import { collection, doc, getDocs, listCollections, where } from "firebase/firestore";
-import { sortBySecond } from "../../../services/sortBySecond";
+import { db } from "../../../../core/firebase";
+import { collection, getDocs, listCollections, where } from "firebase/firestore";
+import { sortBySecond } from "../../../../services/sortBySecond";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]";
 
 export default async function handler(req, res) {
+  const session = await unstable_getServerSession(req, res, authOptions);
+
+  if (!session) return res.status(401).json({error: "Unauthorized User"});
+
   const { board_name } = req.query;
 
   let allColumns = [];
