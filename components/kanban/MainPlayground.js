@@ -235,10 +235,10 @@ const MainPlayground = () => {
     <MainPlayGroundContainer>
       <Heading>
         <h2 style={{ margin: "0" }}>
-          {selectedBoard?.name ?? "selected a board"}
+          {selectedBoard?.name ?? "Select a board"}
         </h2>
         <Options>
-          {columns.length > 0 && (
+          {columns?.length > 0 && (
             <Button onClick={() => setOpenNewTask(true)}>+Add New Task</Button>
           )}
           <MoreVertIcon onClick={handleClick} />
@@ -280,7 +280,7 @@ const MainPlayground = () => {
       </Heading>
       <PlayGround>
         {/* Previous Columns */}
-        {columns.map((column) => (
+        {columns?.map((column) => (
           <Column key={column.id}>
             {canEditCol ? (
               <div
@@ -318,9 +318,11 @@ const MainPlayground = () => {
           </Column>
         ))}
         {/* Add New Column */}
-        <Column addNew onClick={() => setOpenNewColumnn(true)}>
-          <Card addNew>+New Column</Card>
-        </Column>
+        {!!columns &&
+          <Column addNew onClick={() => setOpenNewColumnn(true)}>
+            <Card addNew>+New Column</Card>
+          </Column>
+        }
       </PlayGround>
     </MainPlayGroundContainer>
   );
