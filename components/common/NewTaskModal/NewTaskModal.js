@@ -38,7 +38,7 @@ export const Option = styled.option`
   color: ${darkTheme.primaryText};
 `;
 
-const TextArea = styled.textarea`
+export const TextArea = styled.textarea`
   width: 100%;
   padding: 10px;
   color: ${darkTheme.primaryText};
