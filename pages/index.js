@@ -8,11 +8,11 @@ import { signIn, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
 export default function Home() {
-  const { data: {user}, status} = useSession();
+  const { data: session, status} = useSession();
 
   useEffect(() => {
-    if (user && user.id) Router.push('/kanban');
-  }, [user])
+    if (session && session.user) Router.push('/kanban');
+  }, [session])
 
   return (
     <div className={styles.container}>
