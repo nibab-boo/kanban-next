@@ -11,7 +11,7 @@ import { selectedState } from "../../atoms/selectedAtom";
 import { selectedTask } from "../../atoms/selectedTask";
 import { doneCount } from "../../services/doneCount";
 import { signOut } from "next-auth/react";
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -153,6 +153,7 @@ const MainPlayground = () => {
 
   // Delete Board
   const handleDeleteBoard = useCallback(() => {
+    handleClose();
     if (!selectedBoard?.id) return;
     const references = [`projects/${selectedBoard.id}`];
 
@@ -181,7 +182,6 @@ const MainPlayground = () => {
         if (newProjects?.length > 0) setSelectedBoard(newProjects?.[0]);
       })
       .catch((error) => console.log("DELETE FAILED :---: ", error));
-    handleClose();
   }, [columns, selectedBoard, setProjects, setSelectedBoard]);
 
   // OnBlur in InputField
@@ -209,18 +209,27 @@ const MainPlayground = () => {
   );
 
   // Delete Col along with all task
-  const deleteCol = useCallback((columnId) => {
-    const column = columns.find((col) => col.id === columnId);
-    if (!!column) return;
-    const references = [`projects/${column?.boardId}/columns/${column.id}`];
-    column?.items?.forEach((task) => {
-      references.push(`tasks/${task.id}`);
-    })
-    deleteReferences(references)
-      .then((res) => {
-        setColumns((oldColumns) => oldColumns.filter((col) => col.id !== column.id))
-      }).catch((error) => console.error("Error deleting COl :---:", error));
-  }, [columns, setColumns])
+  const deleteCol = useCallback(
+    (columnId) => {
+      const column = columns.find((col) => col.id === columnId);
+      if (!column) return;
+      console.log("I came here for deleting");
+      const references = [`projects/${column?.boardId}/columns/${column.id}`];
+      column?.items?.forEach((task) => {
+        references.push(`tasks/${task.id}`);
+      });
+      console.log("REFERENCES :--:", references);
+
+      deleteReferences(references)
+        .then((res) => {
+          setColumns((oldColumns) =>
+            oldColumns.filter((col) => col.id !== column.id)
+          );
+        })
+        .catch((error) => console.error("Error deleting COl :---:", error));
+    },
+    [columns, setColumns]
+  );
 
   return (
     <MainPlayGroundContainer>
@@ -241,14 +250,27 @@ const MainPlayground = () => {
             MenuListProps={{
               "aria-labelledby": "basic-button",
             }}
+            sx={{
+              color: darkTheme.primaryText,
+            }}
           >
             <MenuItem onClick={handleDeleteBoard}>Delete Board</MenuItem>
             {!!canEditCol ? (
-              <MenuItem onClick={() => setCanEditCol(false)}>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  setCanEditCol(false);
+                }}
+              >
                 Edit Done
               </MenuItem>
             ) : (
-              <MenuItem onClick={() => setCanEditCol(true)}>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  setCanEditCol(true);
+                }}
+              >
                 Edit Column
               </MenuItem>
             )}
@@ -261,16 +283,21 @@ const MainPlayground = () => {
         {columns.map((column) => (
           <Column key={column.id}>
             {canEditCol ? (
-              <div style={{display: 'flex', alignItems: "center", gap: "1rem"}}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+              >
                 <Input
                   style={{ padding: "4px", fontSize: ".8rem", border: "none" }}
                   defaultValue={column.name}
                   onBlur={(e) =>
                     checkAndUpdate(e.currentTarget.value || "", column.id)
                   }
-                  />
-                  <DeleteIcon style={{color: "red", fontSize: "1rem", cursor: "pointer"}} onClick={() => deleteCol(column.id)}/>
-                </div>
+                />
+                <DeleteIcon
+                  style={{ color: "red", fontSize: "1rem", cursor: "pointer" }}
+                  onClick={() => deleteCol(column.id)}
+                />
+              </div>
             ) : (
               <Dot>
                 {column.name} ( {column.items?.length ?? 0} )
