@@ -15,6 +15,7 @@ import { signOut } from "next-auth/react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { projectsState } from "../../atoms/projectsAtoms";
+import { deleteReferences } from "../../utils/request";
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -160,26 +161,22 @@ const MainPlayground = () => {
     });
 
     // Making a call
-    fetch("/api/boards/delete", {
-      method: "POST",
-      body: JSON.stringify(references)
-    }).then((res) => res.json())
-    .then((data) => {
-      console.log(' Data ', data);
-      let newProjects = [];
-      // Creating Projects
-      setProjects((oldProjects) => {
-        newProjects = oldProjects.filter(
-          (oldProject) => selectedBoard.id !== oldProject.id
-          );
-          return newProjects;
-        });
-        
-        // Set 1st project as selected project.
-      if (newProjects?.length > 0) setSelectedBoard(newProjects?.[0]);
-    })
-    .catch((error) => console.log("DELETE FAILED :---: ", error));
-
+    deleteReferences(references)
+      .then((data) => {
+        console.log(' Data ', data);
+        let newProjects = [];
+        // Removing Deleted Project
+        setProjects((oldProjects) => {
+          newProjects = oldProjects.filter(
+            (oldProject) => selectedBoard.id !== oldProject.id
+            );
+            return newProjects;
+          });
+          
+          // Set 1st project as selected project.
+        if (newProjects?.length > 0) setSelectedBoard(newProjects?.[0]);
+      })
+      .catch((error) => console.log("DELETE FAILED :---: ", error));
     handleClose();
   }, [columns, selectedBoard, setProjects, setSelectedBoard]);
 
