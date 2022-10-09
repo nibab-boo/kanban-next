@@ -26,7 +26,7 @@ const SideBarContainer = styled.div`
   display: flex;
   flex-direction: column;
 `;
-const LogoBox = styled.div`
+export const LogoBox = styled.div`
   display: flex;
   align-items: flex-start;
   padding: 1rem 0 0;
@@ -34,7 +34,7 @@ const LogoBox = styled.div`
   color: ${darkTheme.primaryText};
 `;
 
-const Title = styled.h1`
+export const Title = styled.h1`
   margin: 0 0 0 0.6rem;
   font-size: 2rem;
 `;

@@ -1,5 +1,5 @@
 import { db } from "../../../../core/firebase";
-import { collection, getDocs, listCollections, where } from "firebase/firestore";
+import { collection, getDocs, where } from "firebase/firestore";
 import { sortBySecond } from "../../../../services/sortBySecond";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]";
