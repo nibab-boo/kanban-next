@@ -267,12 +267,10 @@ const MainPlayground = () => {
     (columnId) => {
       const column = columns.find((col) => col.id === columnId);
       if (!column) return;
-      console.log("I came here for deleting");
       const references = [`projects/${column?.boardId}/columns/${column.id}`];
       column?.items?.forEach((task) => {
         references.push(`tasks/${task.id}`);
       });
-      console.log("REFERENCES :--:", references);
 
       deleteReferences(references)
         .then((res) => {

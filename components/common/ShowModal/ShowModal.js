@@ -2,7 +2,7 @@ import { Menu, MenuItem, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import React from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { columnsState } from "../../../atoms/columnsAtom";
 import InputField, { Input, InputContainer, Label } from "../InputField";
 import {
@@ -24,6 +24,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useRef } from "react";
 import { Button } from "../Button";
 import DoneIcon from '@mui/icons-material/Done';
+import { useUpdateColumns } from "../../../hooks/useUpdateColumns/useUpdateColumns";
 
 const SubTaskCover = styled.div`
   background-color: ${darkTheme.bodyBg};
@@ -51,10 +52,11 @@ const ShowModal = () => {
     setAnchorEl(null);
   }, []);
 
-  const [columns, setColumns] = useRecoilState(columnsState);
+  const columns = useRecoilValue(columnsState);
   const [showTask, setShowTask] = useRecoilState(selectedTask);
   const [canEditTask, setCanEditTask] = useRecoilState(canEditTaskState);
   const [subTaskCount, setCount] = useState(1);
+  const {updateTask, deleteTask} = useUpdateColumns();
 
   // New SUBTASK
   const addSubTask = useCallback(() => {
@@ -115,23 +117,7 @@ const ShowModal = () => {
     updateDocument(`tasks/${showTask.id}`, newShowTask)
       .then((res) => {
         // Change Task in Column
-        setColumns((oldColumns) => {
-          const newCols = [];
-          oldColumns?.forEach((oldCol) => {
-            if (oldCol.id === showTask.columnId) {
-              const newTasks = [];
-              oldCol?.items?.forEach((task) =>
-                task.id === showTask.id
-                  ? newTasks.push(newShowTask)
-                  : newTasks.push(task)
-              );
-              newCols.push({ ...oldCol, items: newTasks });
-            } else {
-              newCols.push(oldCol);
-            }
-          });
-          return newCols;
-        });
+        updateTask(newShowTask);
       })
       .catch((error) => {
         console.log("Error Updating Task :---: ", error);
@@ -143,7 +129,7 @@ const ShowModal = () => {
         // Revert Back showTask
       });
     setCanEditTask(false);
-  }, [columns, handleClose, setCanEditTask, setColumns, setShowTask, showTask]);
+  }, [columns, handleClose, setCanEditTask, setShowTask, showTask, updateTask]);
 
   console.log('TASK :---: ', showTask);
 
@@ -161,23 +147,11 @@ const ShowModal = () => {
     deleteDocument(`tasks/${showTask.id}`)
       .then((res) => {
         // Delete Successful, filter col.
-        setColumns((oldColumns) => {
-          const newCols = [];
-          oldColumns.forEach((oldCol) => {
-            oldCol?.items.find((task) => task?.id === showTask?.id)
-              ? newCols.push({
-                  ...oldCol,
-                  items: oldCol?.items?.filter(
-                    (task) => task.id !== showTask?.id
-                  ),
-                })
-              : newCols.push(oldCol);
-          });
-        });
+        deleteTask(showTask);
         setShowTask(null);
       })
       .catch((error) => console.log("Error Deleting Task :---: ", error));
-  }, [showTask, setColumns, setShowTask]);
+  }, [showTask, deleteTask, setShowTask]);
 
   const checkAndReplace = useCallback(
     (value, type) => {

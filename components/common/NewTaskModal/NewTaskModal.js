@@ -56,7 +56,7 @@ const NewTaskModal = () => {
   const [title, setTitle] = useState(null);
   const [description, setDescription] = useState(null);
   const [status, setStatus] = useState(null);
-  const {AddNewTask} = useUpdateColumns();
+  const {addNewTask} = useUpdateColumns();
 
   const onModalClose = useCallback(() => {
     setCount(1);
@@ -102,12 +102,12 @@ const NewTaskModal = () => {
         subTasks: subTasks,
         timestamp: { seconds: dateTime.getTime() / 1000 },
       };
-      AddNewTask(newTask);
+      addNewTask(newTask);
     } catch (error) {
       console.error(error);
     }
     setOpenNewTask(false);
-  }, [title, setOpenNewTask, description, status, columns, selectedBoard, AddNewTask]);
+  }, [title, setOpenNewTask, description, status, columns, selectedBoard, addNewTask]);
 
   return (
     <Modal

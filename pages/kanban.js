@@ -32,7 +32,7 @@ import { unstable_getServerSession } from "next-auth";
 const Container = styled.div`
   display: flex;
   height: 100vh;
-  max-height: 100vh;
+  overflow: auto;
   widht: 100vw;
   max-width: 100vw;
 `;
