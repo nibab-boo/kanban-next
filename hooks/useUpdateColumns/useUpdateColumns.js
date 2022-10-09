@@ -5,6 +5,23 @@ import { columnsState } from "../../atoms/columnsAtom";
 export const useUpdateColumns = () => {
   const [columns, setColumns] = useRecoilState(columnsState);
 
+  // Add New Task
+  const AddNewTask = useCallback(
+    (newTask) =>
+      setColumns((old) => {
+        let clone = [...old];
+        const index = clone.findIndex(
+          (column) => column.id === newTask.columnId
+        );
+        let col = { ...clone[index] };
+        let items = [...col.items];
+        col.items = [...items, newTask];
+        clone[index] = col;
+        return clone;
+      }),
+    [setColumns]
+  );
+
   // Update existing task with new Task
   const updateTask = useCallback(
     (newTask) => {
@@ -30,26 +47,28 @@ export const useUpdateColumns = () => {
   );
 
   // Delete and Insert New Task
-  const deleteAndInsert = useCallback((removeFrom, toAddTask) => {
-    console.table({removeFrom, toAddTask })
-    setColumns((oldColumns) => {
-      const newCols = [];
-      oldColumns?.forEach((oldCol) => {
-        if (oldCol.id === toAddTask.columnId) {
-          newCols.push({ ...oldCol, items: [...oldCol.items, toAddTask] });
-        } else if (oldCol.id === removeFrom) {
-          newCols.push({
-            ...oldCol,
-            items: oldCol.items?.filter((task) => task.id !== toAddTask.id),
-          });
-        } else {
-          newCols.push(oldCol);
-        }
+  const deleteAndInsert = useCallback(
+    (removeFrom, toAddTask) => {
+      console.table({ removeFrom, toAddTask });
+      setColumns((oldColumns) => {
+        const newCols = [];
+        oldColumns?.forEach((oldCol) => {
+          if (oldCol.id === toAddTask.columnId) {
+            newCols.push({ ...oldCol, items: [...oldCol.items, toAddTask] });
+          } else if (oldCol.id === removeFrom) {
+            newCols.push({
+              ...oldCol,
+              items: oldCol.items?.filter((task) => task.id !== toAddTask.id),
+            });
+          } else {
+            newCols.push(oldCol);
+          }
+        });
+        return newCols;
       });
-      console.log("NEW COLUMNS :---: ", newCols);
-      return newCols;
-    });
-  }, [setColumns]);
+    },
+    [setColumns]
+  );
 
-  return { updateTask, deleteAndInsert };
+  return { updateTask, deleteAndInsert, AddNewTask };
 };
