@@ -6,7 +6,7 @@ export const useUpdateColumns = () => {
   const [columns, setColumns] = useRecoilState(columnsState);
 
   // Add New Task
-  const AddNewTask = useCallback(
+  const addNewTask = useCallback(
     (newTask) =>
       setColumns((old) => {
         let clone = [...old];
@@ -70,5 +70,25 @@ export const useUpdateColumns = () => {
     [setColumns]
   );
 
-  return { updateTask, deleteAndInsert, AddNewTask };
+  // Delete a task
+  const deleteTask = useCallback(
+    (oldTask) =>
+      setColumns((oldColumns) => {
+        const newCols = [];
+        oldColumns.forEach((oldCol) => {
+          oldCol?.items.find((task) => task?.id === oldTask?.id)
+            ? newCols.push({
+                ...oldCol,
+                items: oldCol?.items?.filter(
+                  (task) => task.id !== oldTask?.id
+                ),
+              })
+            : newCols.push(oldCol);
+        });
+        return newCols;
+      }),
+    [setColumns]
+  );
+
+  return { updateTask, deleteAndInsert, addNewTask, deleteTask };
 };
