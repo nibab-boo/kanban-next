@@ -1,12 +1,8 @@
-import Head from "next/head";
-import Image from "next/image";
-import styles from "../styles/Home.module.css";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { unstable_getServerSession } from "next-auth";
 import Router from "next/router";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { useEffect } from "react";
 import { Container } from "@mui/system";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import styled, { css } from "styled-components";
@@ -16,6 +12,8 @@ import { darkTheme } from "../styles/color";
 import ViewColumnIcon from "@mui/icons-material/ViewColumn";
 import { LogoBox, Title } from "../components/kanban/SideBar";
 import Link from "next/link";
+import { selectedState } from "../atoms/selectedAtom";
+import { useRecoilState } from "recoil";
 
 const FullScreen = styled.div`
   width: 100vw;
@@ -144,6 +142,7 @@ export default function Home() {
   const { data: session, status } = useSession();
 
   const loggedIn = useMemo(() => !!(session && session.user), [session]);
+  const [selectedBoard, setSelectedBoard] = useRecoilState(selectedState);
 
   const changeUserStatus = useCallback(
     (e) => {
@@ -176,7 +175,14 @@ export default function Home() {
           </LogoBox>
           {loggedIn ? (
             <Switch>
-              <SwitchInput type="checkbox" checked onChange={() => signOut()} />
+              <SwitchInput
+                type="checkbox"
+                checked
+                onChange={() => {
+                  setSelectedBoard(null);
+                  signOut();
+                }}
+              />
               <Slider className="slider">
                 <SignUpText sliderType logOut className="log-out">
                   Log out

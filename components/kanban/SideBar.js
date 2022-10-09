@@ -147,6 +147,7 @@ const SideBar = () => {
   const projects = useRecoilValue(projectsState);
   const [selectedId, setSelectedId] = useRecoilState(selectedState);
   const [hideSideBar, setHideSideBar] = useRecoilState(hideSideBarState);
+  const [selectedBoard, setSelectedBoard] = useRecoilState(selectedState);
 
   const onBoardClick = useCallback(
     (project) => {
@@ -194,7 +195,14 @@ const SideBar = () => {
                   alt={session?.user?.name ?? session?.user?.email}
                   src={session?.user?.image}
                 />
-                <LogOutButton onClick={() => signOut()}>Log Out</LogOutButton>
+                <LogOutButton
+                  onClick={() => {
+                    setSelectedBoard();
+                    signOut();
+                  }}
+                >
+                  Log Out
+                </LogOutButton>
               </UserInfoBox>
               <ToogleShow onClick={() => setHideSideBar(true)}>
                 <VisibilityOffIcon fontSize="small" />
@@ -207,10 +215,14 @@ const SideBar = () => {
           <Link href="/" passHref>
             <ViewColumnIcon
               fontSize="small"
-              style={{ margin: "1rem 0 auto"}}
+              style={{ margin: "1rem 0 auto" }}
             />
           </Link>
-          <VisibilityIcon fontSize="small" style={{ margin: "auto 0 1rem" }} onClick={() => setHideSideBar(false)}/>
+          <VisibilityIcon
+            fontSize="small"
+            style={{ margin: "auto 0 1rem" }}
+            onClick={() => setHideSideBar(false)}
+          />
         </>
       )}
     </SideBarContainer>
