@@ -151,6 +151,23 @@ const MainPlayground = () => {
     setAnchorEl(null);
   };
 
+  // Drag Effect
+  const dragStartHandler = useCallback((ev) => {
+    ev.dataTransfer.setData("cardId", ev.target.dataset.id);
+    ev.dataTransfer.effectAllowed = "move";
+  }, [])
+
+  const dropHandler = useCallback((ev) => {
+    const data = ev.dataTransfer.getData("cardId");
+    const child = document.querySelector(`[data-id=${data}]`);
+    child && ev?.target?.appendChild(child);
+  }, [])
+
+  const dragOverHandler = useCallback((ev) => {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = "move";
+  }, [])
+
   // Delete Board
   const handleDeleteBoard = useCallback(() => {
     handleClose();
@@ -281,7 +298,12 @@ const MainPlayground = () => {
       <PlayGround>
         {/* Previous Columns */}
         {columns?.map((column) => (
-          <Column key={column.id}>
+          <Column
+            key={column.id}
+            data-id={column.id}
+            onDragOver={dragOverHandler}
+            onDrop={dropHandler}
+          >
             {canEditCol ? (
               <div
                 style={{ display: "flex", alignItems: "center", gap: "1rem" }}
@@ -304,7 +326,13 @@ const MainPlayground = () => {
               </Dot>
             )}
             {column?.items?.map((card) => (
-              <Card key={card.id} onClick={() => setShowTask(card)}>
+              <Card
+                key={card.id}
+                onClick={() => setShowTask(card)}
+                draggable
+                data-id={"card-" + card.id}
+                onDragStart={dragStartHandler}
+              >
                 {card.name}
                 <br />
                 <p style={{ color: darkTheme.secondaryText }}>
@@ -318,11 +346,11 @@ const MainPlayground = () => {
           </Column>
         ))}
         {/* Add New Column */}
-        {!!columns &&
+        {!!columns && (
           <Column addNew onClick={() => setOpenNewColumnn(true)}>
             <Card addNew>+New Column</Card>
           </Column>
-        }
+        )}
       </PlayGround>
     </MainPlayGroundContainer>
   );
