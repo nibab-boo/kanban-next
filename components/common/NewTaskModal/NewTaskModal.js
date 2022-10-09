@@ -9,7 +9,6 @@ import { Button } from "../Button";
 import InputField, { InputContainer, Label } from "../InputField";
 import styled from "styled-components";
 import { newTaskModalState } from "../../../atoms/newTaskModalAtom";
-import { async } from "@firebase/util";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../core/firebase";
 import { selectedState } from "../../../atoms/selectedAtom";

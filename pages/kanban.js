@@ -119,6 +119,7 @@ const Kanban = () => {
     fetch("/api/boards/" + selectedId.id)
       .then(res => res.json())
       .then(data => {
+        console.log("data :---: ", data);
         setColumns(data.data || [])})
       .catch(error => console.log("ERROR", error));
 
@@ -160,7 +161,9 @@ const Kanban = () => {
 
   
   // if (status === "loading") return <p>Loading.....</p>;
-  if (status === "unauthenticated") Router.push("/");
+  useEffect(() => {
+    if (status === "unauthenticated") Router.push("/");
+  }, [status])
 
 
   return (

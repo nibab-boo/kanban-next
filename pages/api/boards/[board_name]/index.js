@@ -13,12 +13,10 @@ export default async function handler(req, res) {
 
   let allColumns = [];
   let allTasks = [];
-  console.log("Board Name :---: ", board_name);
   try {
     const columnsResponse = await getDocs(
       collection(db, "projects", board_name, "columns")
     );
-    console.log("BOARD :---: ", columnsResponse);
     columnsResponse?.forEach((doc) => {
       allColumns.push({
         id: doc.id,
@@ -31,13 +29,11 @@ export default async function handler(req, res) {
   }
   
   allColumns = sortBySecond(allColumns);
-  
   try {
     const tasksResponse = await getDocs(
       collection(db, "tasks"),
       where("boardId", "==", board_name),
       );
-      console.log("TASKS :---: ", tasksResponse);
       tasksResponse?.forEach((doc) => {
         allTasks.push({
           id: doc.id,
