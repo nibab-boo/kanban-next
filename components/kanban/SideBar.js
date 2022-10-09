@@ -13,8 +13,29 @@ import { newProjectModalState } from "../../atoms/newProjectModalAtom.js";
 import { projectsState } from "../../atoms/projectsAtoms";
 import { selectedState } from "../../atoms/selectedAtom";
 import { useCallback } from "react";
+import { Avatar } from "@mui/material";
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 
 const label = { inputProps: { "aria-label": "Switch Mode" } };
+
+const LogOutButton = styled.button`
+  padding: 12px 24px;
+  background: ${darkTheme.sideBg};
+  border: 0px solid black;
+  border-radius: 40px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  color: ${darkTheme.secondaryText}
+  transition: .6s;
+  &:hover {
+    background: ${darkTheme.secondaryText};
+    color: ${darkTheme.primaryText};
+  }
+`;
 
 const SideBarContainer = styled.div`
   max-width: 70vw;
@@ -26,12 +47,13 @@ const SideBarContainer = styled.div`
   display: flex;
   flex-direction: column;
 `;
-export const LogoBox = styled.div`
+export const LogoBox = styled.a`
   display: flex;
   align-items: flex-start;
   padding: 1rem 0 0;
   height: 5rem;
   color: ${darkTheme.primaryText};
+  cursor: normal;
 `;
 
 export const Title = styled.h1`
@@ -88,12 +110,13 @@ const SideBarFooter = styled.div`
   font-size: 0.8rem;
 `;
 
-const ToogleTheme = styled.div`
+const UserInfoBox = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   background: ${darkTheme.bodyBg};
-  padding: 0.2rem 0;
+  padding: 0.2rem;
+  border-radius: 24px;
 `;
 
 const ToogleShow = styled.div`
@@ -104,6 +127,7 @@ const ToogleShow = styled.div`
 `;
 
 const SideBar = () => {
+  const { data: session } = useSession();
   const [open, setOpen] = useRecoilState(newProjectModalState);
   const projects = useRecoilValue(projectsState);
   const [selectedId, setSelectedId] = useRecoilState(selectedState);
@@ -118,10 +142,12 @@ const SideBar = () => {
 
   return (
     <SideBarContainer>
-      <LogoBox>
-        <ViewColumnIcon fontSize="large" style={{ fontSize: "2.64rem" }} />
-        <Title>kanban</Title>
-      </LogoBox>
+      <Link href="/" passHref>
+        <LogoBox>
+          <ViewColumnIcon fontSize="large" style={{ fontSize: "2.64rem" }} />
+          <Title>kanban</Title>
+        </LogoBox>
+      </Link>
       <SideBarContent>
         <Boards>
           <SecondaryTitle>All Boards ( {projects.length} )</SecondaryTitle>
@@ -142,11 +168,10 @@ const SideBar = () => {
           </Board>
         </Boards>
         <SideBarFooter>
-          <ToogleTheme>
-            <LightModeIcon fontSize="small" style={{ fontSize: "medium" }} />
-            <Switch {...label} defaultChecked />
-            <ModeNightIcon fontSize="small" style={{ fontSize: "medium" }} />
-          </ToogleTheme>
+          <UserInfoBox>
+            <Avatar alt={session?.user?.name ?? session?.user?.email} src={session?.user?.image} />
+            <LogOutButton onClick={() => signOut()}>Log Out</LogOutButton>
+          </UserInfoBox>
           <ToogleShow>
             {true ? (
               <>

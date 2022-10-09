@@ -316,7 +316,6 @@ const MainPlayground = () => {
                 Edit Column
               </MenuItem>
             )}
-            <MenuItem onClick={() => signOut()}>Logout</MenuItem>
           </Menu>
         </Options>
       </Heading>
