@@ -2,12 +2,8 @@ import styled, { css } from "styled-components";
 import { darkTheme } from "../../styles/color";
 import ViewColumnIcon from "@mui/icons-material/ViewColumn";
 import ViewSidebarIcon from "@mui/icons-material/ViewSidebar";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import ModeNightIcon from "@mui/icons-material/ModeNight";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-
-import Switch from "@mui/material/Switch";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { newProjectModalState } from "../../atoms/newProjectModalAtom.js";
 import { projectsState } from "../../atoms/projectsAtoms";
@@ -16,6 +12,7 @@ import { useCallback } from "react";
 import { Avatar } from "@mui/material";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { hideSideBarState } from "../../atoms/hideSideBar";
 
 const label = { inputProps: { "aria-label": "Switch Mode" } };
 
@@ -35,17 +32,22 @@ const LogOutButton = styled.button`
     background: ${darkTheme.secondaryText};
     color: ${darkTheme.primaryText};
   }
-`;
+  `;
 
 const SideBarContainer = styled.div`
   max-width: 70vw;
-  width: 260px;
   height: 100vh;
   background-color: ${darkTheme.sideBg};
   color: ${darkTheme.secondaryText};
   padding: 0 1rem;
   display: flex;
+  width: 260px;
   flex-direction: column;
+  ${(props) =>
+    props.autoWidth &&
+    css`
+      width: auto;
+    `}
 `;
 export const LogoBox = styled.a`
   display: flex;
@@ -120,9 +122,22 @@ const UserInfoBox = styled.div`
 `;
 
 const ToogleShow = styled.div`
-  margin: 0.8rem 0 2.4rem;
+  background: ${darkTheme.bodyBg};
+  padding: 4px;
+  display: inline-block;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 0.6rem auto 2rem;
   & svg {
-    vertical-align: bottom;
+    vertical-align: middle;
+  }
+  &::after {
+    content: "  Hide SideBar";
+    white-space: pre;
+    transition: 1s;
+  }
+  &:hover::after {
+    content: "";
   }
 `;
 
@@ -131,6 +146,7 @@ const SideBar = () => {
   const [open, setOpen] = useRecoilState(newProjectModalState);
   const projects = useRecoilValue(projectsState);
   const [selectedId, setSelectedId] = useRecoilState(selectedState);
+  const [hideSideBar, setHideSideBar] = useRecoilState(hideSideBarState);
 
   const onBoardClick = useCallback(
     (project) => {
@@ -141,48 +157,62 @@ const SideBar = () => {
   );
 
   return (
-    <SideBarContainer>
-      <Link href="/" passHref>
-        <LogoBox>
-          <ViewColumnIcon fontSize="large" style={{ fontSize: "2.64rem" }} />
-          <Title>kanban</Title>
-        </LogoBox>
-      </Link>
-      <SideBarContent>
-        <Boards>
-          <SecondaryTitle>All Boards ( {projects.length} )</SecondaryTitle>
-          {projects.map((project) => (
-            <Board
-              key={project.id}
-              selected={selectedId && project.id === selectedId?.id}
-              onClick={() => onBoardClick(project)}
-            >
-              <ViewSidebarIcon style={{ marginRight: ".8rem" }} />
-              <Text>{project.name}</Text>
-            </Board>
-          ))}
-          <Board createNew onClick={() => setOpen(true)}>
-            <ViewSidebarIcon style={{ marginRight: ".8rem" }} />
-            <strong>+</strong>
-            Create New Board
-          </Board>
-        </Boards>
-        <SideBarFooter>
-          <UserInfoBox>
-            <Avatar alt={session?.user?.name ?? session?.user?.email} src={session?.user?.image} />
-            <LogOutButton onClick={() => signOut()}>Log Out</LogOutButton>
-          </UserInfoBox>
-          <ToogleShow>
-            {true ? (
-              <>
-                <VisibilityOffIcon fontSize="small" /> Hide Sidebar
-              </>
-            ) : (
-              <VisibilityIcon fontSize="small" />
-            )}
-          </ToogleShow>
-        </SideBarFooter>
-      </SideBarContent>
+    <SideBarContainer autoWidth={!!hideSideBar}>
+      {!hideSideBar ? (
+        <>
+          <Link href="/" passHref>
+            <LogoBox>
+              <ViewColumnIcon
+                fontSize="large"
+                style={{ fontSize: "2.64rem" }}
+              />
+              <Title>kanban</Title>
+            </LogoBox>
+          </Link>
+          <SideBarContent>
+            <Boards>
+              <SecondaryTitle>All Boards ( {projects.length} )</SecondaryTitle>
+              {projects.map((project) => (
+                <Board
+                  key={project.id}
+                  selected={selectedId && project.id === selectedId?.id}
+                  onClick={() => onBoardClick(project)}
+                >
+                  <ViewSidebarIcon style={{ marginRight: ".8rem" }} />
+                  <Text>{project.name}</Text>
+                </Board>
+              ))}
+              <Board createNew onClick={() => setOpen(true)}>
+                <ViewSidebarIcon style={{ marginRight: ".8rem" }} />
+                <strong>+</strong>
+                Create New Board
+              </Board>
+            </Boards>
+            <SideBarFooter>
+              <UserInfoBox>
+                <Avatar
+                  alt={session?.user?.name ?? session?.user?.email}
+                  src={session?.user?.image}
+                />
+                <LogOutButton onClick={() => signOut()}>Log Out</LogOutButton>
+              </UserInfoBox>
+              <ToogleShow onClick={() => setHideSideBar(true)}>
+                <VisibilityOffIcon fontSize="small" />
+              </ToogleShow>
+            </SideBarFooter>
+          </SideBarContent>
+        </>
+      ) : (
+        <>
+          <Link href="/" passHref>
+            <ViewColumnIcon
+              fontSize="small"
+              style={{ margin: "1rem 0 auto"}}
+            />
+          </Link>
+          <VisibilityIcon fontSize="small" style={{ margin: "auto 0 1rem" }} onClick={() => setHideSideBar(false)}/>
+        </>
+      )}
     </SideBarContainer>
   );
 };
