@@ -12,6 +12,7 @@ import { newTaskModalState } from "../../../atoms/newTaskModalAtom";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../core/firebase";
 import { selectedState } from "../../../atoms/selectedAtom";
+import { useUpdateColumns } from "../../../hooks/useUpdateColumns/useUpdateColumns";
 
 export const PLACEHOLDER = [
   "eg. Get Coffee Beans",
@@ -48,13 +49,14 @@ export const TextArea = styled.textarea`
 
 const NewTaskModal = () => {
   const [openNewTask, setOpenNewTask] = useRecoilState(newTaskModalState);
-  const [columns, setColumns] = useRecoilState(columnsState);
+  const columns = useRecoilValue(columnsState);
   const selectedBoard = useRecoilValue(selectedState);
 
   const [subTaskCount, setCount] = useState(1);
   const [title, setTitle] = useState(null);
   const [description, setDescription] = useState(null);
   const [status, setStatus] = useState(null);
+  const {AddNewTask} = useUpdateColumns();
 
   const onModalClose = useCallback(() => {
     setCount(1);
@@ -69,7 +71,7 @@ const NewTaskModal = () => {
   }, [subTaskCount]);
 
   const createTask = useCallback(async () => {
-    if (!title) alert("Title is required.");
+    if (!title) return alert("Title is required.");
     const subInputs = document.querySelectorAll("input[name='sub-task']");
     const subTasks = [];
     subInputs.forEach((subInput, i) => {
@@ -100,30 +102,12 @@ const NewTaskModal = () => {
         subTasks: subTasks,
         timestamp: { seconds: dateTime.getTime() / 1000 },
       };
-      setColumns((old) => {
-        let clone = [...old];
-        const index = clone.findIndex(
-          (column) => column.id === newTask.columnId
-        );
-        let col = { ...clone[index] };
-        let items = [...col.items];
-        col.items = [...items, newTask];
-        clone[index] = col;
-        return clone;
-      });
+      AddNewTask(newTask);
     } catch (error) {
       console.error(error);
     }
     setOpenNewTask(false);
-  }, [
-    title,
-    status,
-    setOpenNewTask,
-    description,
-    columns,
-    selectedBoard,
-    setColumns,
-  ]);
+  }, [title, setOpenNewTask, description, status, columns, selectedBoard, AddNewTask]);
 
   return (
     <Modal
@@ -187,7 +171,7 @@ const NewTaskModal = () => {
               name="status"
               onChange={(e) => setStatus(e?.target?.value ?? "")}
             >
-              {columns.map((column) => (
+              {columns?.map((column) => (
                 <Option key={column.id} value={column.id}>
                   {column.name}
                 </Option>

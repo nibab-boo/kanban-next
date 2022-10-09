@@ -24,7 +24,7 @@ import { hideSideBarState } from "../../atoms/hideSideBar";
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
-  overflow: hidden;
+  height: 100vh;
 `;
 
 const NewTaskButton = styled(Button)`
@@ -59,7 +59,6 @@ const PlayGround = styled.div`
   background: ${darkTheme.bodyBg};
   width: auto;
   height: calc(100vh - 5rem);
-  // overflow: hidden;
   padding: 1rem;
   font-size: 0.8rem;
   display: flex;

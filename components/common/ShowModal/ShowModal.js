@@ -53,13 +53,8 @@ const ShowModal = () => {
 
   const [columns, setColumns] = useRecoilState(columnsState);
   const [showTask, setShowTask] = useRecoilState(selectedTask);
-  const [subTasks, setSubTasks] = useState([]);
   const [canEditTask, setCanEditTask] = useRecoilState(canEditTaskState);
   const [subTaskCount, setCount] = useState(1);
-
-  useEffect(() => {
-    if (showTask) setSubTasks([...showTask.subTasks]);
-  }, [showTask]);
 
   // New SUBTASK
   const addSubTask = useCallback(() => {
@@ -94,6 +89,7 @@ const ShowModal = () => {
     [setShowTask]
   );
 
+  console.log("SHOW :", showTask);
   const saveTask = useCallback(() => {
     if (!showTask.name) {
       alert("Name cannot be empty.");
@@ -297,14 +293,14 @@ const ShowModal = () => {
             ) : (
               <Description>{showTask.description}</Description>
             ))}
-          {showTask && !!showTask?.subTasks?.length && (
+          {showTask && !!showTask.subTasks?.length && (
             <>
               <Label>
-                Subtasks({doneCount(showTask?.subTasks || [])} of{" "}
-                {showTask?.subTasks.length})
+                Subtasks({doneCount(showTask.subTasks || [])} of{" "}
+                {showTask.subTasks?.length})
               </Label>
               <InputContainer margin="1rem auto 0">
-                {subTasks.map((subTask) => (
+                {showTask.subTasks?.map((subTask) => (
                   <SubTaskCover key={subTask.name}>
                     <Input
                       id="subTaskID"
