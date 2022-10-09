@@ -10,8 +10,8 @@ import { newTaskModalState } from "../../atoms/newTaskModalAtom";
 import { selectedState } from "../../atoms/selectedAtom";
 import { selectedTask } from "../../atoms/selectedTask";
 import { doneCount } from "../../services/doneCount";
-import { signOut } from "next-auth/react";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -19,12 +19,24 @@ import { projectsState } from "../../atoms/projectsAtoms";
 import { deleteReferences, updateDocument } from "../../utils/request";
 import { canEditColumnState } from "../../atoms/canEditColumnAtom";
 import { Input } from "../common/InputField";
-import { Task } from "@mui/icons-material";
 import { useUpdateColumns } from "../../hooks";
+import { hideSideBarState } from "../../atoms/hideSideBar";
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
   overflow: hidden;
+`;
+
+const NewTaskButton = styled(Button)`
+  &:after {
+    content: "Add new task";
+    white-space: pre;
+  }
+  @media (max-width: 768px) {
+    &:after {
+      content: "Task";
+    }
+  }
 `;
 
 const Heading = styled.div`
@@ -64,7 +76,7 @@ const PlayGround = styled.div`
 `;
 
 const Column = styled.div`
-  width: 260px;
+  min-width: 260px;
   max-width: 70vw;
   height: 100%;
   grow: 1;
@@ -141,6 +153,7 @@ const MainPlayground = () => {
   const [showTask, setShowTask] = useRecoilState(selectedTask);
   const [canEditCol, setCanEditCol] = useRecoilState(canEditColumnState);
   const { deleteAndInsert } = useUpdateColumns();
+  const hideSideBar = useRecoilValue(hideSideBarState);
 
   // Menu code
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -166,8 +179,8 @@ const MainPlayground = () => {
       const child = document.querySelector(`[data-id=${data}]`);
       const parentNode = ev?.target;
       // child &&
-        // child.parentNode?.dataset?.myId &&
-        // parentNode?.appendChild(child);
+      // child.parentNode?.dataset?.myId &&
+      // parentNode?.appendChild(child);
       if (child?.parentNode?.dataset?.myId && parentNode?.dataset?.myId) {
         const newColId = parentNode.dataset?.myId;
         const myTask = columns
@@ -281,7 +294,9 @@ const MainPlayground = () => {
         </h2>
         <Options>
           {columns?.length > 0 && (
-            <Button onClick={() => setOpenNewTask(true)}>+Add New Task</Button>
+            <NewTaskButton onClick={() => setOpenNewTask(true)}>
+              <AddIcon fontSize="small" />
+            </NewTaskButton>
           )}
           <MoreVertIcon onClick={handleClick} />
           <Menu
@@ -371,11 +386,12 @@ const MainPlayground = () => {
           </Column>
         ))}
         {/* Add New Column */}
-        {!!columns && (
-          <Column addNew onClick={() => setOpenNewColumnn(true)}>
-            <Card addNew>+New Column</Card>
-          </Column>
-        )}
+        <Column
+          addNew
+          onClick={() => !!selectedBoard && setOpenNewColumnn(true)}
+        >
+          {selectedBoard && <Card addNew>+New Column</Card>}
+        </Column>
       </PlayGround>
     </MainPlayGroundContainer>
   );
