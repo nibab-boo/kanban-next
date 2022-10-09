@@ -19,6 +19,8 @@ import { projectsState } from "../../atoms/projectsAtoms";
 import { deleteReferences, updateDocument } from "../../utils/request";
 import { canEditColumnState } from "../../atoms/canEditColumnAtom";
 import { Input } from "../common/InputField";
+import { Task } from "@mui/icons-material";
+import { useUpdateColumns } from "../../hooks";
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -138,6 +140,7 @@ const MainPlayground = () => {
   const [selectedBoard, setSelectedBoard] = useRecoilState(selectedState);
   const [showTask, setShowTask] = useRecoilState(selectedTask);
   const [canEditCol, setCanEditCol] = useRecoilState(canEditColumnState);
+  const { deleteAndInsert } = useUpdateColumns();
 
   // Menu code
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -155,18 +158,40 @@ const MainPlayground = () => {
   const dragStartHandler = useCallback((ev) => {
     ev.dataTransfer.setData("cardId", ev.target.dataset.id);
     ev.dataTransfer.effectAllowed = "move";
-  }, [])
+  }, []);
 
-  const dropHandler = useCallback((ev) => {
-    const data = ev.dataTransfer.getData("cardId");
-    const child = document.querySelector(`[data-id=${data}]`);
-    child && ev?.target?.appendChild(child);
-  }, [])
+  const dropHandler = useCallback(
+    (ev) => {
+      const data = ev.dataTransfer.getData("cardId");
+      const child = document.querySelector(`[data-id=${data}]`);
+      const parentNode = ev?.target;
+      // child &&
+        // child.parentNode?.dataset?.myId &&
+        // parentNode?.appendChild(child);
+      if (child?.parentNode?.dataset?.myId && parentNode?.dataset?.myId) {
+        const newColId = parentNode.dataset?.myId;
+        const myTask = columns
+          .find((col) => col.id === child.dataset?.columnId)
+          ?.items?.find((task) => task.id === data);
+        if (!myTask) return;
+        updateDocument(`tasks/${data}`, { ...myTask, columnId: newColId })
+          .then(() => {
+            deleteAndInsert(child.dataset.columnId, {
+              ...myTask,
+              columnId: newColId,
+            });
+            child.dataset.columnId = newColId;
+          })
+          .catch((err) => console.log("ERROR :---: ", err));
+      }
+    },
+    [columns, deleteAndInsert]
+  );
 
   const dragOverHandler = useCallback((ev) => {
     ev.preventDefault();
     ev.dataTransfer.dropEffect = "move";
-  }, [])
+  }, []);
 
   // Delete Board
   const handleDeleteBoard = useCallback(() => {
@@ -300,7 +325,7 @@ const MainPlayground = () => {
         {columns?.map((column) => (
           <Column
             key={column.id}
-            data-id={column.id}
+            data-my-id={column.id}
             onDragOver={dragOverHandler}
             onDrop={dropHandler}
           >
@@ -330,7 +355,8 @@ const MainPlayground = () => {
                 key={card.id}
                 onClick={() => setShowTask(card)}
                 draggable
-                data-id={"card-" + card.id}
+                data-id={card.id}
+                data-column-id={card.columnId}
                 onDragStart={dragStartHandler}
               >
                 {card.name}
