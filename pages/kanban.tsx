@@ -28,8 +28,11 @@ import NewTaskModal from "../components/common/NewTaskModal/NewTaskModal";
 import ShowModal from "../components/common/ShowModal/ShowModal";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { unstable_getServerSession } from "next-auth";
+import { ProjectsType, ProjectType } from "../types/project";
+import { ColumnType } from "../types/column";
+import { GetServerSideProps } from "next";
 
-const Container = styled.div`
+const KanbanContainer = styled.div`
   display: flex;
   height: 100vh;
   overflow: auto;
@@ -45,8 +48,8 @@ const Kanban = () => {
   const [projects, setProjects] = useRecoilState(projectsState);
   const [columns, setColumns] = useRecoilState(columnsState);
   const { data: session, status } = useSession();
-  const [keyword, setKeyword] = useState("");
-  const [columnName, setColumnName] = useState("");
+  const [keyword, setKeyword] = useState<string>("");
+  const [columnName, setColumnName] = useState<string>("");
 
   const fetchProjects = useCallback(async () => {
     const q = query(
@@ -57,13 +60,13 @@ const Kanban = () => {
 
     const projectSnapshot = await getDocs(q);
 
-    const allProjects = [];
+    const allProjects: ProjectsType = [];
 
     projectSnapshot.forEach((doc) => {
       allProjects.push({
         id: doc.id,
         ...doc.data(),
-      });
+      } as ProjectType);
     });
 
     allProjects.sort((a, b) => {
@@ -75,7 +78,7 @@ const Kanban = () => {
       return 0;
     });
 
-    setProjects(allProjects ?? []);
+    setProjects(allProjects);
   }, [session, setProjects]);
 
 
@@ -119,7 +122,7 @@ const Kanban = () => {
     fetch("/api/boards/" + selectedId.id)
       .then(res => res.json())
       .then(data => {
-        console.log("data :---: ", data);
+        console.log("Columns :---: ", data);
         setColumns(data.data || [])})
       .catch(error => console.log("ERROR", error));
 
@@ -138,7 +141,7 @@ const Kanban = () => {
         }
       );
       const dateTime = new Date();
-      const newCol = {
+      const newCol: ColumnType = {
         id: response.id,
         name: columnName,
         userId: session?.user?.id,
@@ -155,7 +158,6 @@ const Kanban = () => {
   }, [columnName, selectedId, session, setOpenNewColumn, columns, setColumns]);
 
   useEffect(() => {
-    console.log("session?.user?.id", session?.user?.id);
     fetchProjects();
   }, [fetchProjects, session]);
 
@@ -167,7 +169,7 @@ const Kanban = () => {
 
 
   return (
-    <Container>
+    <KanbanContainer>
       <Head>
         <title>My Kanban</title>
         <meta name="description" content="Kanban playground" />
@@ -194,13 +196,13 @@ const Kanban = () => {
       />
       <ShowModal />
       <NewTaskModal />
-    </Container>
+    </KanbanContainer>
   );
 };
 
 export default Kanban;
 
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       session: await unstable_getServerSession(

@@ -6,7 +6,7 @@ export type ColumnType = {
   id: string;
   items: TaskType[];
   name: string;
-  timestamp: Timestamp | string;
+  timestamp: Timestamp | {seconds: number};
   userId: string;
 }
 
