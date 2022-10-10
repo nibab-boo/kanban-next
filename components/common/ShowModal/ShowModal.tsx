@@ -23,7 +23,7 @@ import { deleteDocument, updateDocument } from "../../../utils/request";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useRef } from "react";
 import { Button } from "../Button";
-import DoneIcon from '@mui/icons-material/Done';
+import DoneIcon from "@mui/icons-material/Done";
 import { useUpdateColumns } from "../../../hooks/useUpdateColumns/useUpdateColumns";
 import { SubTaskType, TaskType } from "../../../types/task";
 
@@ -46,7 +46,7 @@ const ShowModal = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const changeData = useRef(false);
-  const handleClick = (event) => {
+  const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = useCallback(() => {
@@ -57,11 +57,13 @@ const ShowModal = () => {
   const [showTask, setShowTask] = useRecoilState(selectedTask);
   const [canEditTask, setCanEditTask] = useRecoilState(canEditTaskState);
   const [subTaskCount, setCount] = useState(1);
-  const {updateTask, deleteTask} = useUpdateColumns();
+  const { updateTask, deleteTask, deleteAndInsert } = useUpdateColumns();
 
   // New SUBTASK
   const addSubTask = useCallback(() => {
-    const subInput = document.querySelectorAll("input[name='sub-task']") as unknown as HTMLInputElement[] | null;
+    const subInput = document.querySelectorAll(
+      "input[name='sub-task']"
+    ) as unknown as HTMLInputElement[] | null;
     if (subInput?.[subTaskCount - 1]?.value) {
       setCount(subTaskCount + 1);
     }
@@ -86,7 +88,14 @@ const ShowModal = () => {
 
   const changeTaskStatus = useCallback(
     (newColId: string) => {
-      setShowTask((selectedTask) => ({ ...selectedTask, columnId: newColId } as TaskType));
+      setShowTask(
+        (selectedTask) =>
+          ({
+            ...selectedTask,
+            oldColId: selectedTask?.columnId,
+            columnId: newColId,
+          } as TaskType)
+      );
       changeData.current = true;
     },
     [setShowTask]
@@ -100,7 +109,9 @@ const ShowModal = () => {
     }
     handleClose();
     // Checking for
-    const subInputs = document.querySelectorAll("input[name='sub-task']") as unknown as HTMLInputElement[] | null;
+    const subInputs = document.querySelectorAll(
+      "input[name='sub-task']"
+    ) as unknown as HTMLInputElement[] | null;
     const subTasks: SubTaskType[] = [];
     subInputs?.forEach((subInput, i) => {
       if (subInput.value)
@@ -115,10 +126,12 @@ const ShowModal = () => {
         ? { ...showTask, subTasks: [...showTask.subTasks, ...subTasks] }
         : showTask;
     if (subTasks.length > 0) setShowTask(newShowTask);
-    updateDocument(`tasks/${showTask.id}`, newShowTask)
+    const task = {...showTask};
+    delete task.oldColId;
+    updateDocument(`tasks/${showTask.id}`, task)
       .then((res) => {
         // Change Task in Column
-        updateTask(newShowTask);
+        updateTask({...newShowTask, oldColId: undefined});
       })
       .catch((error) => {
         console.log("Error Updating Task :---: ", error);
@@ -126,24 +139,47 @@ const ShowModal = () => {
         // Revert Back showTask
         setShowTask((oldTask) => {
           const myCol = columns.find((col) => col.id === showTask.columnId);
-          return myCol?.items?.find((task) => task.id === showTask.id) as TaskType;
+          return myCol?.items?.find(
+            (task) => task.id === showTask.id
+          ) as TaskType;
         });
       });
     setCanEditTask(false);
   }, [columns, handleClose, setCanEditTask, setShowTask, showTask, updateTask]);
 
-
   const beforeClose = useCallback(() => {
-    if (changeData.current) {
-      saveTask();
+    if (changeData.current && showTask) {
+      const task = {...showTask};
+      delete task.oldColId;
+      updateDocument(`tasks/${showTask.id}`, task)
+        .then((res) => {
+          // Change Task in Column
+          console.log("Task :---: ", showTask);
+          showTask.oldColId
+            ? deleteAndInsert(showTask.oldColId, {...showTask, oldColId: undefined})
+            : updateTask(showTask);
+        })
+        .catch((error) => {
+          console.log("Error Updating Task :---: ", error);
+          alert("Error Occured. Reverting Back the changes");
+          // Revert Back showTask
+          setShowTask((oldTask) => {
+            const myCol = columns.find((col) => col.id === showTask.columnId);
+            return myCol?.items?.find(
+              (task) => task.id === showTask.id
+            ) as TaskType;
+          });
+        });
       changeData.current = false;
     }
     setShowTask(null);
-  }, [saveTask, setShowTask]);
+    setCount(1);
+  }, [columns, deleteAndInsert, setShowTask, showTask, updateTask]);
 
   // On Delete Task
   const handleDeleteTask = useCallback(() => {
     // Make a request for delete
+    if (!showTask) return;
     deleteDocument(`tasks/${showTask?.id}`)
       .then((res) => {
         // Delete Successful, filter col.
@@ -154,7 +190,7 @@ const ShowModal = () => {
   }, [showTask, deleteTask, setShowTask]);
 
   const checkAndReplace = useCallback(
-    (value: string | number, type: 'name' | 'description' | 'subTask') => {
+    (value: string | number, type: "name" | "description" | "subTask") => {
       switch (type) {
         case "name":
           if (showTask?.name !== value)
@@ -165,12 +201,15 @@ const ShowModal = () => {
             setShowTask({ ...showTask, description: value } as TaskType);
           break;
         case "subTask":
-          setShowTask((oldTask) => ({
-            ...oldTask,
-            subTasks: oldTask?.subTasks?.filter(
-              (subTask) => subTask.id !== value
-            ),
-          } as TaskType));
+          setShowTask(
+            (oldTask) =>
+              ({
+                ...oldTask,
+                subTasks: oldTask?.subTasks?.filter(
+                  (subTask) => subTask.id !== value
+                ),
+              } as TaskType)
+          );
           break;
         default:
           break;
@@ -229,7 +268,9 @@ const ShowModal = () => {
               }}
             >
               {!!canEditTask ? (
-                <MenuItem onClick={saveTask}><DoneIcon/> Save</MenuItem>
+                <MenuItem onClick={saveTask}>
+                  <DoneIcon /> Save
+                </MenuItem>
               ) : (
                 <>
                   <MenuItem onClick={handleDeleteTask}>
@@ -249,8 +290,7 @@ const ShowModal = () => {
           </div>
         </Typography>
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-          {showTask?.description &&
-            (canEditTask ? (
+          {canEditTask ? (
               <TextArea
                 style={{
                   padding: "4px",
@@ -264,8 +304,13 @@ const ShowModal = () => {
                 }
               />
             ) : (
-              <Description>{showTask.description}</Description>
-            ))}
+              <>
+              {
+                showTask?.description &&
+                <Description>{showTask.description}</Description>
+              }
+              </>
+            )}
           {showTask && !!showTask.subTasks?.length && (
             <>
               <Label>
@@ -276,9 +321,9 @@ const ShowModal = () => {
                 {showTask.subTasks?.map((subTask) => (
                   <SubTaskCover key={subTask.name}>
                     <Input
+                      width="auto"
                       id="subTaskID"
                       type="checkbox"
-                      width="auto"
                       checked={subTask.status}
                       onChange={() => changeSubTaskStatus(subTask)}
                       disabled={canEditTask}
@@ -312,15 +357,15 @@ const ShowModal = () => {
                 ))}
                 {canEditTask && (
                   <>
-                    <SubTaskCover>
+                    <SubTaskCover style={{flexDirection: "column"}}>
                       {[...new Array(subTaskCount)].map((item, i) => (
-                        <InputField
+                        <Input
                           style={{
                             padding: "4px",
                             fontSize: ".8rem",
                           }}
                           key={i}
-                          containerMargin="4px 0"
+                          margin="4px 0"
                           name="sub-task"
                           placeholder={PLACEHOLDER[i] ?? "Caff - eind"}
                         />

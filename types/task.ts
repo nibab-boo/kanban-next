@@ -6,12 +6,13 @@ export type SubTaskType = {
   status: boolean;
 }
 
-export type TaskType = {
+export interface TaskType {
   boardId: string;
   columnId: string;
   description?: string;
   id: string;
   name: string;
   subTasks: SubTaskType[];
+  oldColId?: string;
   timestamp: Timestamp | {seconds: number};
 }

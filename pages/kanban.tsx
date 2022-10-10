@@ -2,7 +2,7 @@ import Head from "next/head";
 import styled from "styled-components";
 import MainPlayground from "../components/kanban/MainPlayground";
 import SideBar from "../components/kanban/SideBar";
-import { newProjectModalState } from "../atoms/newProjectModalAtom.js";
+import { newProjectModalState } from "../atoms/newProjectModalAtom";
 import { useRecoilState } from "recoil";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -134,7 +134,8 @@ const Kanban = () => {
   }, [selectedId, setColumns]);
 
   const createColumn = useCallback(async () => {
-    if (!columnName || !session?.user?.id || !selectedId.id) return;
+    console.log({columnName, session: session?.user?.id, selectedId: selectedId?.id });
+    if (!columnName || !session?.user?.id || !selectedId?.id) return;
     try {
       const response = await addDoc(
         collection(doc(db, "projects", selectedId.id), "columns"),

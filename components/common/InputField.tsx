@@ -43,14 +43,17 @@ export const Input = styled.input<InputType>`
   width: 100%;
   font-size: 1rem;
   ${props => `
-    margin: ${props.margin ?? 0}
+    margin: ${props.margin ?? 0};
   `}
   ${props => props.width && `
-    width: ${props.width}
+    width: ${props.width};
   `}
 `
 
-interface InputFieldProps extends React.HTMLProps<HTMLInputElement> {
+interface InputFieldProps extends React.DetailedHTMLProps<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    HTMLInputElement
+  > {
   containerMargin?: string;
   labelSize?: string;
   block?: string;
@@ -58,6 +61,8 @@ interface InputFieldProps extends React.HTMLProps<HTMLInputElement> {
   label?: string;
   placeholder?: string;
   inputMargin?: string;
+  inputWidth?: string;
+  style: any;
 }
 
 const InputField = ({
@@ -67,15 +72,20 @@ const InputField = ({
   name="input",
   label,
   placeholder="",
+  onChange,
+  inputWidth,
+  style,
 }: InputFieldProps) => {
   return (
-    <InputContainer margin={containerMargin}>
+    <InputContainer margin={containerMargin} style={style}>
       {label && <Label htmlFor={name} labelSize={labelSize} block={block}>
         {label}
       </Label>}
-      <Input 
+      <Input
+        onChange={onChange}
         name={name}
         placeholder={placeholder}
+        width={inputWidth}
       />
     </InputContainer>
   );

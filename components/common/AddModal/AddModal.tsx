@@ -1,6 +1,6 @@
 import { Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { SetStateAction } from "react";
+import React, { SetStateAction, useCallback } from "react";
 import InputField from "../InputField";
 import { darkTheme } from "../../../styles/color";
 import { Button } from "../Button";
@@ -26,7 +26,7 @@ type AddModalProps = {
   action: () => void;
   openStatus: boolean;
   onClose: () => void;
-  setKeyword: React.Dispatch<SetStateAction<string>>;
+  setKeyword: any;
 };
 
 const AddModal = ({
@@ -37,6 +37,12 @@ const AddModal = ({
   onClose,
   setKeyword,
 }: AddModalProps) => {
+
+  const changeEvent = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setKeyword(e?.target?.value ?? e?.currentTarget?.value ?? '')
+    }
+  , [setKeyword])
   return (
     <Modal
       open={openStatus}
@@ -58,9 +64,7 @@ const AddModal = ({
             name="board_name"
             label="Board Name"
             placeholder="eg. Web Design"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setKeyword(e?.target?.value ?? "")
-            }
+            onChange={changeEvent}
           />
           <Button fullSize margin="2rem auto 0" onClick={action}>
             {ButtonText}

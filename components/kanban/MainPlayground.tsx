@@ -182,7 +182,7 @@ const MainPlayground = () => {
   const dropHandler = useCallback(
     (ev: React.DragEvent<HTMLDivElement>) => {
       const data = ev.dataTransfer.getData("cardId");
-      const child: HTMLDivElement | null = document.querySelector(`[data-id=${data}]`);
+      const child: HTMLDivElement | null = document.querySelector(`[data-id="${data}"]`);
       const parentNode = ev?.target as HTMLDivElement | null;
       const childParent = child?.parentNode as HTMLDivElement | null;
       // child &&
@@ -196,7 +196,7 @@ const MainPlayground = () => {
         if (!myTask) return;
         updateDocument(`tasks/${data}`, { ...myTask, columnId: newColId })
           .then(() => {
-            deleteAndInsert(child.dataset.columnId, {
+            deleteAndInsert(child.dataset.columnId as string, {
               ...myTask,
               columnId: newColId,
             });
@@ -275,7 +275,7 @@ const MainPlayground = () => {
     (columnId: string): void => {
       const column = columns.find((col) => col.id === columnId);
       if (!column) return;
-      const references = [`projects/${column?.boardId}/columns/${column.id}`];
+      const references: string[] = [`projects/${column?.boardId}/columns/${column.id}`];
       column?.items?.forEach((task) => {
         references.push(`tasks/${task.id}`);
       });
@@ -295,7 +295,7 @@ const MainPlayground = () => {
     <MainPlayGroundContainer>
       <Heading>
         <h2 style={{ margin: "0" }}>
-          {selectedBoard?.name ?? "Select a board"}
+          {selectedBoard?.name}
         </h2>
         <Options>
           {columns?.length > 0 && (

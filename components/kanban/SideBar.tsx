@@ -5,7 +5,7 @@ import ViewSidebarIcon from "@mui/icons-material/ViewSidebar";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { newProjectModalState } from "../../atoms/newProjectModalAtom.js";
+import { newProjectModalState } from "../../atoms/newProjectModalAtom";
 import { projectsState } from "../../atoms/projectsAtoms";
 import { selectedState } from "../../atoms/selectedAtom";
 import { useCallback } from "react";

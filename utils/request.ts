@@ -2,7 +2,7 @@ import { deleteDoc, doc, DocumentData, DocumentReference, Firestore, setDoc } fr
 import { db } from "../core/firebase";
 
 // Delete References
-export const deleteReferences = (references: string) => {
+export const deleteReferences = (references: string[]) => {
   return new Promise((resolve, reject) => {
     fetch('/api/delete',
       {
