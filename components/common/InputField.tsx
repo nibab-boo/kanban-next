@@ -62,7 +62,7 @@ interface InputFieldProps extends React.DetailedHTMLProps<
   placeholder?: string;
   inputMargin?: string;
   inputWidth?: string;
-  style: any;
+  style?: any;
 }
 
 const InputField = ({
