@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const batch = writeBatch(db);
   const references: string[] = JSON.parse(req.body);
   references?.forEach((ref) => {
-    const docRef = doc(db, ...ref.split('/'));
+    const docRef = doc(db as any, ...ref.split('/'));
     batch.delete(docRef);
   })
   batch
