@@ -73,7 +73,8 @@ const Slider = styled.span`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: black;
+  background-color: ${darkTheme.secondaryText} ;
+
 
   .icon {
     -webkit-transition: 0.8s;
@@ -210,6 +211,9 @@ export default function Home() {
         <Tools>
           <Link href="https://nextjs.org/" passHref prefetch={false}>
             <Tech>NextJs</Tech>
+          </Link>
+          <Link href="https://www.typescriptlang.org/" passHref prefetch={false}>
+            <Tech>Typescript</Tech>
           </Link>
           <Link href="https://styled-components.com/" passHref prefetch={false}>
             <Tech>Styled-Component</Tech>

@@ -241,7 +241,8 @@ const MainPlayground = () => {
         });
 
         // Set 1st project as selected project.
-        if (newProjects?.length > 0) setSelectedBoard(newProjects?.[0]);
+        setSelectedBoard(() => (newProjects?.length > 0) ? newProjects[0] : null);
+
       })
       .catch((error) => console.log("DELETE FAILED :---: ", error));
   }, [columns, selectedBoard, setProjects, setSelectedBoard]);
