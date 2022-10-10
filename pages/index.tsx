@@ -14,6 +14,7 @@ import { LogoBox, Title } from "../components/kanban/SideBar";
 import Link from "next/link";
 import { selectedState } from "../atoms/selectedAtom";
 import { useRecoilState } from "recoil";
+import { GetServerSideProps } from "next";
 
 const FullScreen = styled.div`
   width: 100vw;
@@ -91,7 +92,12 @@ const Slider = styled.span`
   border-radius: 34px;
 `;
 
-const SignUpText = styled.span`
+type SignUpTextProps = {
+  readonly sliderType: boolean;
+  readonly logIn?: boolean;
+  readonly logOut?: boolean;
+}
+const SignUpText = styled.span<SignUpTextProps>`
   ${(props) =>
     props.sliderType &&
     css`
@@ -144,19 +150,6 @@ export default function Home() {
   const loggedIn = useMemo(() => !!(session && session.user), [session]);
   const [selectedBoard, setSelectedBoard] = useRecoilState(selectedState);
 
-  const changeUserStatus = useCallback(
-    (e) => {
-      e.preventDefault();
-      if (session?.user) {
-        console.log("Signing in");
-        signIn("github").then(() => Router.push("/kanban"));
-      } else {
-        signOut();
-      }
-    },
-    [session]
-  );
-
   return (
     <FullScreen>
       <Container
@@ -166,7 +159,7 @@ export default function Home() {
           <LogoBox onClick={() => session?.user && Router.push("/kanban")}>
             <ViewColumnIcon fontSize="large" style={{ fontSize: "2.64rem" }} />
             {loggedIn ? (
-              <Link href="/kanban" passhref>
+              <Link href="/kanban">
                 <Title>kanban</Title>
               </Link>
             ) : (
@@ -239,7 +232,7 @@ export default function Home() {
   );
 }
 
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       session: await unstable_getServerSession(
