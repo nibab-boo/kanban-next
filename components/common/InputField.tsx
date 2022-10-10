@@ -1,24 +1,39 @@
 import styled, { css } from 'styled-components';
 import { darkTheme } from '../../styles/color';
 
-export const InputContainer = styled.div`
+
+type InputContainerType = {
+  margin?: string;
+}
+
+type LabelType = {
+  labelSize?: string;
+  block?: string;
+}
+
+type InputType = {
+  margin?: string;
+  width?: string;
+}
+
+export const InputContainer = styled.div<InputContainerType>`
   ${props => props.margin && `
     margin: ${props.margin};
   `}
   `;
   
-export const Label = styled.label`
+export const Label = styled.label<LabelType>`
   margin-bottom: .9rem;
   font-size: .9rem;
-  ${props => props.fontSize && `
-    font-size: ${props.fontSize};
+  ${props => props.labelSize && `
+    font-size: ${props.labelSize};
   `}
   ${props => props.block && `
     display: ${props.block};
   `}
 `;
 
-export const Input = styled.input`
+export const Input = styled.input<InputType>`
   padding: 10px;
   border: 2px solid ${darkTheme.secondaryText};
   font-weight: 500;
@@ -27,13 +42,23 @@ export const Input = styled.input`
   background: ${darkTheme.sideBg};
   width: 100%;
   font-size: 1rem;
-  ${props => props.margin && `
-    margin: ${props.margin}
+  ${props => `
+    margin: ${props.margin ?? 0}
   `}
   ${props => props.width && `
     width: ${props.width}
   `}
 `
+
+interface InputFieldProps extends React.HTMLProps<HTMLInputElement> {
+  containerMargin?: string;
+  labelSize?: string;
+  block?: string;
+  name?: string;
+  label?: string;
+  placeholder?: string;
+  inputMargin?: string;
+}
 
 const InputField = ({
   containerMargin = "2rem auto 0",
@@ -42,9 +67,7 @@ const InputField = ({
   name="input",
   label,
   placeholder="",
-  inputMargin = "0",
-  ...props
-}) => {
+}: InputFieldProps) => {
   return (
     <InputContainer margin={containerMargin}>
       {label && <Label htmlFor={name} labelSize={labelSize} block={block}>
@@ -53,8 +76,6 @@ const InputField = ({
       <Input 
         name={name}
         placeholder={placeholder}
-        inputMargin={inputMargin}
-        {...props}
       />
     </InputContainer>
   );

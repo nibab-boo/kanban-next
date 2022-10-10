@@ -16,7 +16,7 @@ import { darkTheme } from "../../../styles/color";
 import styled from "styled-components";
 import { selectedTask } from "../../../atoms/selectedTask";
 import { doneCount } from "../../../services/doneCount";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { canEditTaskState } from "../../../atoms/canEditTaskState";
 import { BorderColorOutlined, DeleteOutline } from "@mui/icons-material";
 import { deleteDocument, updateDocument } from "../../../utils/request";
@@ -25,6 +25,7 @@ import { useRef } from "react";
 import { Button } from "../Button";
 import DoneIcon from '@mui/icons-material/Done';
 import { useUpdateColumns } from "../../../hooks/useUpdateColumns/useUpdateColumns";
+import { SubTaskType, TaskType } from "../../../types/task";
 
 const SubTaskCover = styled.div`
   background-color: ${darkTheme.bodyBg};
@@ -60,23 +61,23 @@ const ShowModal = () => {
 
   // New SUBTASK
   const addSubTask = useCallback(() => {
-    const subInput = document.querySelectorAll("input[name='sub-task']");
-    if (subInput[subTaskCount - 1].value) {
+    const subInput = document.querySelectorAll("input[name='sub-task']") as unknown as HTMLInputElement[] | null;
+    if (subInput?.[subTaskCount - 1]?.value) {
       setCount(subTaskCount + 1);
     }
   }, [subTaskCount]);
 
   const changeSubTaskStatus = useCallback(
-    (clickedSubTask) => {
+    (clickedSubTask: SubTaskType) => {
       setShowTask((selectedTask) => {
-        const copyedTasks = [];
+        const copyedTasks: SubTaskType[] = [];
         selectedTask?.subTasks?.forEach((subTask) => {
           subTask.id === clickedSubTask.id &&
           subTask.name === clickedSubTask.name
             ? copyedTasks.push({ ...subTask, status: !subTask.status })
             : copyedTasks.push(subTask);
         });
-        return { ...selectedTask, subTasks: copyedTasks };
+        return { ...selectedTask, subTasks: copyedTasks } as TaskType;
       });
       changeData.current = true;
     },
@@ -84,8 +85,8 @@ const ShowModal = () => {
   );
 
   const changeTaskStatus = useCallback(
-    (newColId) => {
-      setShowTask((selectedTask) => ({ ...selectedTask, columnId: newColId }));
+    (newColId: string) => {
+      setShowTask((selectedTask) => ({ ...selectedTask, columnId: newColId } as TaskType));
       changeData.current = true;
     },
     [setShowTask]
@@ -93,14 +94,14 @@ const ShowModal = () => {
 
   console.log("SHOW :", showTask);
   const saveTask = useCallback(() => {
-    if (!showTask.name) {
+    if (!showTask?.name) {
       alert("Name cannot be empty.");
       return;
     }
     handleClose();
     // Checking for
-    const subInputs = document.querySelectorAll("input[name='sub-task']");
-    const subTasks = [];
+    const subInputs = document.querySelectorAll("input[name='sub-task']") as unknown as HTMLInputElement[] | null;
+    const subTasks: SubTaskType[] = [];
     subInputs?.forEach((subInput, i) => {
       if (subInput.value)
         subTasks.push({
@@ -122,16 +123,15 @@ const ShowModal = () => {
       .catch((error) => {
         console.log("Error Updating Task :---: ", error);
         alert("Error Occured. Reverting Back the changes");
-        showTask((oldTask) => {
-          const myCol = columns.find((col) => col.id === showTask.columnId);
-          return myCol?.items?.find((task) => task.id === showTask.id);
-        });
         // Revert Back showTask
+        setShowTask((oldTask) => {
+          const myCol = columns.find((col) => col.id === showTask.columnId);
+          return myCol?.items?.find((task) => task.id === showTask.id) as TaskType;
+        });
       });
     setCanEditTask(false);
   }, [columns, handleClose, setCanEditTask, setShowTask, showTask, updateTask]);
 
-  console.log('TASK :---: ', showTask);
 
   const beforeClose = useCallback(() => {
     if (changeData.current) {
@@ -144,7 +144,7 @@ const ShowModal = () => {
   // On Delete Task
   const handleDeleteTask = useCallback(() => {
     // Make a request for delete
-    deleteDocument(`tasks/${showTask.id}`)
+    deleteDocument(`tasks/${showTask?.id}`)
       .then((res) => {
         // Delete Successful, filter col.
         deleteTask(showTask);
@@ -154,16 +154,15 @@ const ShowModal = () => {
   }, [showTask, deleteTask, setShowTask]);
 
   const checkAndReplace = useCallback(
-    (value, type) => {
-      console.table({ type, value });
+    (value: string | number, type: 'name' | 'description' | 'subTask') => {
       switch (type) {
         case "name":
           if (showTask?.name !== value)
-            setShowTask({ ...showTask, name: value });
+            setShowTask({ ...showTask, name: value } as TaskType);
           break;
         case "description":
           if (showTask?.description !== value)
-            setShowTask({ ...showTask, description: value });
+            setShowTask({ ...showTask, description: value } as TaskType);
           break;
         case "subTask":
           setShowTask((oldTask) => ({
@@ -171,7 +170,7 @@ const ShowModal = () => {
             subTasks: oldTask?.subTasks?.filter(
               (subTask) => subTask.id !== value
             ),
-          }));
+          } as TaskType));
           break;
         default:
           break;
@@ -313,7 +312,7 @@ const ShowModal = () => {
                 ))}
                 {canEditTask && (
                   <>
-                    <div>
+                    <SubTaskCover>
                       {[...new Array(subTaskCount)].map((item, i) => (
                         <InputField
                           style={{
@@ -326,7 +325,7 @@ const ShowModal = () => {
                           placeholder={PLACEHOLDER[i] ?? "Caff - eind"}
                         />
                       ))}
-                    </div>
+                    </SubTaskCover>
                     <Button
                       fullSize
                       addSubTask

@@ -13,6 +13,7 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../core/firebase";
 import { selectedState } from "../../../atoms/selectedAtom";
 import { useUpdateColumns } from "../../../hooks/useUpdateColumns/useUpdateColumns";
+import { SubTaskType, TaskType } from "../../../types/task";
 
 export const PLACEHOLDER = [
   "eg. Get Coffee Beans",
@@ -38,6 +39,8 @@ export const Option = styled.option`
   color: ${darkTheme.primaryText};
 `;
 
+export const SubTaskCover = styled.div``;
+
 export const TextArea = styled.textarea`
   width: 100%;
   padding: 10px;
@@ -52,10 +55,10 @@ const NewTaskModal = () => {
   const columns = useRecoilValue(columnsState);
   const selectedBoard = useRecoilValue(selectedState);
 
-  const [subTaskCount, setCount] = useState(1);
-  const [title, setTitle] = useState(null);
-  const [description, setDescription] = useState(null);
-  const [status, setStatus] = useState(null);
+  const [subTaskCount, setCount] = useState<number>(1);
+  const [title, setTitle] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [status, setStatus] = useState<string>('');
   const {addNewTask} = useUpdateColumns();
 
   const onModalClose = useCallback(() => {
@@ -64,21 +67,23 @@ const NewTaskModal = () => {
   }, [setOpenNewTask]);
 
   const addSubTask = useCallback(() => {
-    const subInput = document.querySelectorAll("input[name='sub-task']");
-    if (subInput[subTaskCount - 1].value) {
+    const subInput = document.querySelectorAll("input[name='sub-task']")  as unknown as HTMLInputElement[] | null;
+    if (subInput?.[subTaskCount - 1]?.value) {
       setCount(subTaskCount + 1);
     }
   }, [subTaskCount]);
 
   const createTask = useCallback(async () => {
     if (!title) return alert("Title is required.");
-    const subInputs = document.querySelectorAll("input[name='sub-task']");
-    const subTasks = [];
-    subInputs.forEach((subInput, i) => {
+    if (selectedBoard === null) return;
+
+    const subInputs = document.querySelectorAll("input[name='sub-task']") as unknown as HTMLInputElement[] | null;
+    const subTasks: SubTaskType[] = [];
+    subInputs?.forEach((subInput, i) => {
       if (subInput.value)
         subTasks.push({
           id: i,
-          name: subInput.value,
+          name: subInput?.value,
           status: false,
         });
     });
@@ -92,11 +97,11 @@ const NewTaskModal = () => {
         subTasks: subTasks,
         timestamp: serverTimestamp(),
       });
-      const dateTime = new Date();
-      const newTask = {
+      const dateTime: Date = new Date();
+      const newTask: TaskType = {
         id: response.id,
         name: title,
-        description: description || null,
+        description: description ?? '',
         columnId: status || columns?.[0]?.id,
         boardId: selectedBoard.id,
         subTasks: subTasks,
@@ -131,7 +136,7 @@ const NewTaskModal = () => {
             label="Title"
             containerMargin="1rem auto 0"
             placeholder="eg. Web Design"
-            onChange={(e) => setTitle(e?.target?.value ?? "")}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e?.target?.value ?? "")}
             required
           />
           <InputContainer margin="1rem auto 0">
@@ -140,7 +145,7 @@ const NewTaskModal = () => {
             </Label>
             <TextArea
               rows={4}
-              onChange={(e) => setDescription(e?.target?.value ?? "")}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e?.target?.value ?? "")}
               placeholder="W Web Design Web Design Web Design Web Design Web Designeb Design Web Design Web Design Web Design"
             />
           </InputContainer>
@@ -148,7 +153,7 @@ const NewTaskModal = () => {
             <Label htmlFor="sub-task" labelSize="0.9rem" block="inline-block">
               Sub Tasks
             </Label>
-            <div>
+            <SubTaskCover>
               {[...new Array(subTaskCount)].map((item, i) => (
                 <InputField
                   key={i}
@@ -157,7 +162,7 @@ const NewTaskModal = () => {
                   placeholder={PLACEHOLDER[i] ?? "Caff - eind"}
                 />
               ))}
-            </div>
+            </SubTaskCover>
             <Button
               fullSize
               addSubTask
