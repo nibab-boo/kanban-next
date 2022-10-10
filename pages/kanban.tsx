@@ -2,7 +2,7 @@ import Head from "next/head";
 import styled from "styled-components";
 import MainPlayground from "../components/kanban/MainPlayground";
 import SideBar from "../components/kanban/SideBar";
-import { newProjectModalState } from "../atoms/newProjectModalAtom.js";
+import { newProjectModalState } from "../atoms/newProjectModalAtom";
 import { useRecoilState } from "recoil";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -28,8 +28,11 @@ import NewTaskModal from "../components/common/NewTaskModal/NewTaskModal";
 import ShowModal from "../components/common/ShowModal/ShowModal";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { unstable_getServerSession } from "next-auth";
+import { ProjectsType, ProjectType } from "../types/project";
+import { ColumnType } from "../types/column";
+import { GetServerSideProps } from "next";
 
-const Container = styled.div`
+const KanbanContainer = styled.div`
   display: flex;
   height: 100vh;
   overflow: auto;
@@ -44,9 +47,14 @@ const Kanban = () => {
   const [selectedId, setSelectedId] = useRecoilState(selectedState);
   const [projects, setProjects] = useRecoilState(projectsState);
   const [columns, setColumns] = useRecoilState(columnsState);
-  const { data: session, status } = useSession();
-  const [keyword, setKeyword] = useState("");
-  const [columnName, setColumnName] = useState("");
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      Router.push("/");
+    },
+  })
+  const [keyword, setKeyword] = useState<string>("");
+  const [columnName, setColumnName] = useState<string>("");
 
   const fetchProjects = useCallback(async () => {
     const q = query(
@@ -57,13 +65,13 @@ const Kanban = () => {
 
     const projectSnapshot = await getDocs(q);
 
-    const allProjects = [];
+    const allProjects: ProjectsType = [];
 
     projectSnapshot.forEach((doc) => {
       allProjects.push({
         id: doc.id,
         ...doc.data(),
-      });
+      } as ProjectType);
     });
 
     allProjects.sort((a, b) => {
@@ -75,7 +83,7 @@ const Kanban = () => {
       return 0;
     });
 
-    setProjects(allProjects ?? []);
+    setProjects(allProjects);
   }, [session, setProjects]);
 
 
@@ -119,14 +127,15 @@ const Kanban = () => {
     fetch("/api/boards/" + selectedId.id)
       .then(res => res.json())
       .then(data => {
-        console.log("data :---: ", data);
+        console.log("Columns :---: ", data);
         setColumns(data.data || [])})
       .catch(error => console.log("ERROR", error));
 
   }, [selectedId, setColumns]);
 
   const createColumn = useCallback(async () => {
-    if (!columnName || !session?.user?.id || !selectedId.id) return;
+    console.log({columnName, session: session?.user?.id, selectedId: selectedId?.id });
+    if (!columnName || !session?.user?.id || !selectedId?.id) return;
     try {
       const response = await addDoc(
         collection(doc(db, "projects", selectedId.id), "columns"),
@@ -138,7 +147,7 @@ const Kanban = () => {
         }
       );
       const dateTime = new Date();
-      const newCol = {
+      const newCol: ColumnType = {
         id: response.id,
         name: columnName,
         userId: session?.user?.id,
@@ -155,19 +164,11 @@ const Kanban = () => {
   }, [columnName, selectedId, session, setOpenNewColumn, columns, setColumns]);
 
   useEffect(() => {
-    console.log("session?.user?.id", session?.user?.id);
     fetchProjects();
   }, [fetchProjects, session]);
 
-  
-  // if (status === "loading") return <p>Loading.....</p>;
-  useEffect(() => {
-    if (status === "unauthenticated") Router.push("/");
-  }, [status])
-
-
   return (
-    <Container>
+    <KanbanContainer>
       <Head>
         <title>My Kanban</title>
         <meta name="description" content="Kanban playground" />
@@ -194,13 +195,13 @@ const Kanban = () => {
       />
       <ShowModal />
       <NewTaskModal />
-    </Container>
+    </KanbanContainer>
   );
 };
 
 export default Kanban;
 
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       session: await unstable_getServerSession(

@@ -21,6 +21,8 @@ import { canEditColumnState } from "../../atoms/canEditColumnAtom";
 import { Input } from "../common/InputField";
 import { useUpdateColumns } from "../../hooks";
 import { hideSideBarState } from "../../atoms/hideSideBar";
+import { ProjectsType } from "../../types/project";
+import { ColumnsType } from "../../types/column";
 
 const MainPlayGroundContainer = styled.div`
   width: 100%;
@@ -74,7 +76,11 @@ const PlayGround = styled.div`
   }
 `;
 
-const Column = styled.div`
+type AddNewType = {
+  addNew?: boolean;
+}
+
+const Column = styled.div<AddNewType>`
   min-width: 260px;
   max-width: 70vw;
   height: 100%;
@@ -119,7 +125,7 @@ const Dot = styled.h4`
   }
 `;
 
-const Card = styled.div`
+const Card = styled.div<AddNewType>`
   width: 260px;
   line-height: 125%;
   font-weight: 500;
@@ -155,9 +161,9 @@ const MainPlayground = () => {
   const hideSideBar = useRecoilValue(hideSideBarState);
 
   // Menu code
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = React.useState<SVGSVGElement | null>(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => {
+  const handleClick = (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -167,20 +173,22 @@ const MainPlayground = () => {
   };
 
   // Drag Effect
-  const dragStartHandler = useCallback((ev) => {
-    ev.dataTransfer.setData("cardId", ev.target.dataset.id);
+  const dragStartHandler = useCallback((ev: React.DragEvent<HTMLDivElement>) => {
+    const child = ev.target as HTMLDivElement;
+    ev.dataTransfer.setData("cardId", child.dataset.id ?? '');
     ev.dataTransfer.effectAllowed = "move";
   }, []);
 
   const dropHandler = useCallback(
-    (ev) => {
+    (ev: React.DragEvent<HTMLDivElement>) => {
       const data = ev.dataTransfer.getData("cardId");
-      const child = document.querySelector(`[data-id=${data}]`);
-      const parentNode = ev?.target;
+      const child: HTMLDivElement | null = document.querySelector(`[data-id="${data}"]`);
+      const parentNode = ev?.target as HTMLDivElement | null;
+      const childParent = child?.parentNode as HTMLDivElement | null;
       // child &&
       // child.parentNode?.dataset?.myId &&
       // parentNode?.appendChild(child);
-      if (child?.parentNode?.dataset?.myId && parentNode?.dataset?.myId) {
+      if (child && childParent?.dataset?.myId && parentNode?.dataset?.myId) {
         const newColId = parentNode.dataset?.myId;
         const myTask = columns
           .find((col) => col.id === child.dataset?.columnId)
@@ -188,7 +196,7 @@ const MainPlayground = () => {
         if (!myTask) return;
         updateDocument(`tasks/${data}`, { ...myTask, columnId: newColId })
           .then(() => {
-            deleteAndInsert(child.dataset.columnId, {
+            deleteAndInsert(child.dataset.columnId as string, {
               ...myTask,
               columnId: newColId,
             });
@@ -200,7 +208,7 @@ const MainPlayground = () => {
     [columns, deleteAndInsert]
   );
 
-  const dragOverHandler = useCallback((ev) => {
+  const dragOverHandler = useCallback((ev: React.DragEvent<HTMLDivElement>) => {
     ev.preventDefault();
     ev.dataTransfer.dropEffect = "move";
   }, []);
@@ -223,7 +231,7 @@ const MainPlayground = () => {
     deleteReferences(references)
       .then((data) => {
         console.log(" Data ", data);
-        let newProjects = [];
+        let newProjects: ProjectsType = [];
         // Removing Deleted Project
         setProjects((oldProjects) => {
           newProjects = oldProjects.filter(
@@ -240,15 +248,15 @@ const MainPlayground = () => {
 
   // OnBlur in InputField
   const checkAndUpdate = useCallback(
-    (newValue, columnId) => {
+    (newValue: string, columnId: string): void => {
       if (!columnId || !selectedBoard?.id) return;
       if (columns.find((col) => col.id === columnId)?.name !== newValue) {
         updateDocument(`projects/${selectedBoard?.id}/columns/${columnId}`, {
           name: newValue,
-        }).then((data) => {
+        }).then(() => {
           // Change Columns.find(columnId).name = newValue
           setColumns((oldColumns) => {
-            const newCols = [];
+            const newCols: ColumnsType = [];
             oldColumns.forEach((col) => {
               col.id === columnId
                 ? newCols.push({ ...col, name: newValue })
@@ -264,10 +272,10 @@ const MainPlayground = () => {
 
   // Delete Col along with all task
   const deleteCol = useCallback(
-    (columnId) => {
+    (columnId: string): void => {
       const column = columns.find((col) => col.id === columnId);
       if (!column) return;
-      const references = [`projects/${column?.boardId}/columns/${column.id}`];
+      const references: string[] = [`projects/${column?.boardId}/columns/${column.id}`];
       column?.items?.forEach((task) => {
         references.push(`tasks/${task.id}`);
       });
@@ -287,7 +295,7 @@ const MainPlayground = () => {
     <MainPlayGroundContainer>
       <Heading>
         <h2 style={{ margin: "0" }}>
-          {selectedBoard?.name ?? "Select a board"}
+          {selectedBoard?.name}
         </h2>
         <Options>
           {columns?.length > 0 && (

@@ -1,6 +1,13 @@
 import styled, { css } from 'styled-components';
 import { darkTheme } from '../../styles/color';
-export const Button = styled.button`
+
+type ButtonProps = {
+  fullSize?: boolean;
+  margin?: string;
+  addSubTask?: boolean;
+}
+
+export const Button = styled.button<ButtonProps>`
   background: ${darkTheme.buttonBg};
   // color: ${darkTheme.primaryText};
   color: white;
