@@ -4,8 +4,8 @@ import { ProjectType } from "../types/project";
 
 const { persistAtom } = recoilPersist();
 
-export const selectedState = atom<ProjectType | null>({
+export const selectedState = atom({
   key: "selectedState",
-  default: null,
+  default: null as ProjectType | null,
   effects_UNSTABLE: [persistAtom],
 })
