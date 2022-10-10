@@ -47,7 +47,12 @@ const Kanban = () => {
   const [selectedId, setSelectedId] = useRecoilState(selectedState);
   const [projects, setProjects] = useRecoilState(projectsState);
   const [columns, setColumns] = useRecoilState(columnsState);
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      Router.push("/");
+    },
+  })
   const [keyword, setKeyword] = useState<string>("");
   const [columnName, setColumnName] = useState<string>("");
 
@@ -160,13 +165,6 @@ const Kanban = () => {
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects, session]);
-
-  
-  // if (status === "loading") return <p>Loading.....</p>;
-  useEffect(() => {
-    if (status === "unauthenticated") Router.push("/");
-  }, [status])
-
 
   return (
     <KanbanContainer>

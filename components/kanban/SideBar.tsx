@@ -13,6 +13,7 @@ import { Avatar } from "@mui/material";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { hideSideBarState } from "../../atoms/hideSideBar";
+import { ProjectType } from "../../types/project";
 
 const label = { inputProps: { "aria-label": "Switch Mode" } };
 
@@ -34,7 +35,11 @@ const LogOutButton = styled.button`
   }
   `;
 
-const SideBarContainer = styled.div`
+type SideBarContainerType = {
+  autoWidth?: boolean;
+};
+
+const SideBarContainer = styled.div<SideBarContainerType>`
   max-width: 70vw;
   height: 100vh;
   background-color: ${darkTheme.sideBg};
@@ -67,8 +72,12 @@ const Boards = styled.div`
   font-size: 0.8rem;
 `;
 
+type BoardType = {
+  selected?: boolean;
+  createNew?: boolean;
+}
 const Text = styled.span``;
-const Board = styled.div`
+const Board = styled.div<BoardType>`
   display: flex;
   align-items: center;
   padding: 0.4rem 1rem;
@@ -150,7 +159,7 @@ const SideBar = () => {
   const [selectedBoard, setSelectedBoard] = useRecoilState(selectedState);
 
   const onBoardClick = useCallback(
-    (project) => {
+    (project: ProjectType) => {
       if (selectedId && selectedId.id === project.id) return;
       setSelectedId(project);
     },
@@ -197,7 +206,7 @@ const SideBar = () => {
                 />
                 <LogOutButton
                   onClick={() => {
-                    setSelectedBoard();
+                    setSelectedBoard(null);
                     signOut();
                   }}
                 >
