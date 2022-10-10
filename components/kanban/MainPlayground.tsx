@@ -230,6 +230,7 @@ const MainPlayground = () => {
     // Making a call
     deleteReferences(references)
       .then((data) => {
+        setColumns([]);
         console.log(" Data ", data);
         let newProjects: ProjectsType = [];
         // Removing Deleted Project
@@ -245,7 +246,7 @@ const MainPlayground = () => {
 
       })
       .catch((error) => console.log("DELETE FAILED :---: ", error));
-  }, [columns, selectedBoard, setProjects, setSelectedBoard]);
+  }, [columns, selectedBoard.id, setColumns, setProjects, setSelectedBoard]);
 
   // OnBlur in InputField
   const checkAndUpdate = useCallback(
