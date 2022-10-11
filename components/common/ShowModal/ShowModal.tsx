@@ -101,7 +101,6 @@ const ShowModal = () => {
     [setShowTask]
   );
 
-  console.log("SHOW :", showTask);
   const saveTask = useCallback(() => {
     if (!showTask?.name) {
       alert("Name cannot be empty.");
@@ -125,13 +124,12 @@ const ShowModal = () => {
       subTasks.length > 0
         ? { ...showTask, subTasks: [...showTask.subTasks, ...subTasks] }
         : showTask;
-    if (subTasks.length > 0) setShowTask(newShowTask);
-    const task = {...showTask};
-    delete task.oldColId;
+        if (subTasks.length > 0) setShowTask(newShowTask);
+    const {oldColId, ...task} = showTask;
     updateDocument(`tasks/${showTask.id}`, task)
       .then((res) => {
         // Change Task in Column
-        updateTask({...newShowTask, oldColId: undefined});
+        updateTask({...newShowTask});
       })
       .catch((error) => {
         console.log("Error Updating Task :---: ", error);
@@ -149,15 +147,13 @@ const ShowModal = () => {
 
   const beforeClose = useCallback(() => {
     if (changeData.current && showTask) {
-      const task = {...showTask};
-      delete task.oldColId;
+      const {oldColId, ...task} = showTask;
       updateDocument(`tasks/${showTask.id}`, task)
         .then((res) => {
           // Change Task in Column
-          console.log("Task :---: ", showTask);
           showTask.oldColId
-            ? deleteAndInsert(showTask.oldColId, {...showTask, oldColId: undefined})
-            : updateTask(showTask);
+            ? deleteAndInsert(showTask.oldColId, task)
+            : updateTask(task);
         })
         .catch((error) => {
           console.log("Error Updating Task :---: ", error);
