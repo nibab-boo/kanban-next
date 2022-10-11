@@ -200,7 +200,7 @@ export default function Home() {
           {loggedIn ? (
             <Link href={"/kanban"} passHref>
               <Title style={{ cursor: "pointer" }}>
-                <ExitToAppIcon />
+                <ExitToAppIcon fontSize="small"/>
                 Go to Kanban
               </Title>
             </Link>
