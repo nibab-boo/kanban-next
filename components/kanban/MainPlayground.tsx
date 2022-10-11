@@ -231,21 +231,20 @@ const MainPlayground = () => {
     deleteReferences(references)
       .then((data) => {
         setColumns([]);
-        console.log(" Data ", data);
         let newProjects: ProjectsType = [];
         // Removing Deleted Project
         setProjects((oldProjects) => {
           newProjects = oldProjects.filter(
             (oldProject) => selectedBoard.id !== oldProject.id
           );
-          return newProjects;
+          return newProjects ?? oldProjects;
         });
 
         // Set 1st project as selected project.
         setSelectedBoard(() => (newProjects?.length > 0) ? newProjects[0] : null);
       })
       .catch((error) => console.log("DELETE FAILED :---: ", error));
-  }, [columns, selectedBoard.id, setColumns, setProjects, setSelectedBoard]);
+  }, [columns, selectedBoard, setColumns, setProjects, setSelectedBoard]);
 
   // OnBlur in InputField
   const checkAndUpdate = useCallback(
@@ -268,7 +267,7 @@ const MainPlayground = () => {
         });
       }
     },
-    [columns, selectedBoard?.id, setColumns]
+    [columns, selectedBoard, setColumns]
   );
 
   // Delete Col along with all task

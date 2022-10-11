@@ -21,7 +21,7 @@ export const updateDocument = (docPath: string, newData: any) => {
   return new Promise((resolve, reject) => {
     const docRef: DocumentReference<DocumentData> = doc(db as any, ...docPath.split('/'))
     setDoc(docRef, newData, { merge: true })
-      .then((docRef) => resolve(docRef))
+      .then((data) => resolve(data))
       .catch(err => reject(err));
   });
 }
@@ -31,7 +31,7 @@ export const deleteDocument = (docPath: string) => {
   return new Promise((resolve, reject) => {
     const docRef: DocumentReference<DocumentData> = doc(db as any, ...docPath.split('/'))
     deleteDoc(docRef)
-      .then((docRef) => resolve({status: "Delete Successful"}))
+      .then((data) => resolve(data))
       .catch(err => reject(err));
   });
 }

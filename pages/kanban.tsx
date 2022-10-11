@@ -201,14 +201,14 @@ const Kanban = () => {
 
 export default Kanban;
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  return {
-    props: {
-      session: await unstable_getServerSession(
-        context.req,
-        context.res,
-        authOptions
-      ),
-    },
-  }
-}
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   return {
+//     props: {
+//       session: await unstable_getServerSession(
+//         context.req,
+//         context.res,
+//         authOptions
+//       ),
+//     },
+//   }
+// }
