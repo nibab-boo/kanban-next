@@ -142,6 +142,7 @@ const ShowModal = () => {
           ) as TaskType;
         });
       });
+    setCount(1);
     setCanEditTask(false);
   }, [columns, handleClose, setCanEditTask, setShowTask, showTask, updateTask]);
 
@@ -351,7 +352,11 @@ const ShowModal = () => {
                     </Label>
                   </SubTaskCover>
                 ))}
-                {canEditTask && (
+               
+              </InputContainer>
+            </>
+          )}
+           {canEditTask && (
                   <>
                     <SubTaskCover style={{flexDirection: "column"}}>
                       {[...new Array(subTaskCount)].map((item, i) => (
@@ -377,9 +382,6 @@ const ShowModal = () => {
                     </Button>
                   </>
                 )}
-              </InputContainer>
-            </>
-          )}
           {!canEditTask && (
             <InputContainer margin="1rem auto 0">
               <Label
